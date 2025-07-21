@@ -479,7 +479,7 @@
                 const user = userCredential.user;
 
                 // ЗАМІНІТЬ НА ВАШ РЕАЛЬНИЙ EMAIL АДМІНІСТРАТОРА
-                const adminEmail = "mrqwinq@gmail.com";
+                const adminEmail = "olks_prjct.half295@simplelogin.fr";
 
                 if (user.email === adminEmail) {
                     isAdminMode = true;
@@ -631,7 +631,7 @@
         auth.onAuthStateChanged(user => {
             if (user) {
                 console.log("Користувач увійшов: ", user.email);
-                const adminEmail = "mrqwinq@gmail.com"; // ВАШ РЕАЛЬНИЙ EMAIL АДМІНІСТРАТОРА
+                const adminEmail = "olks_prjct.half295@simplelogin.fr"; // ВАШ РЕАЛЬНИЙ EMAIL АДМІНІСТРАТОРА
                 if (user.email === adminEmail) {
                     isAdminMode = true;
                     toggleAddMarkerMode(false); // Адмін в режимі адміна не додає маркери з основного інтерфейсу

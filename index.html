@@ -16,49 +16,41 @@
             font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #f5f5f7; /* Light grey Apple‑style background */
             color: #1d1d1f;
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack elements vertically */
+            min-height: 100vh; /* Ensure full viewport height */
         }
         #map {
-            height: 100vh; /* Full viewport height */
+            flex-grow: 1; /* Allow map to take available space */
             width: 100%;
+            min-height: 50vh; /* Minimum height for map on mobile */
         }
-        #form {
-            position: absolute;
-            top: 20px;
-            left: 20px;
+        
+        /* Default styles for desktop */
+        #form, #legend, #admin-panel {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px); /* Frosted‑glass effect */
+            backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
             max-width: 320px;
-            transition: all 0.3s ease; /* Smooth animation */
-            z-index: 1000; /* Ensure the form stays on top of the map */
+            transition: all 0.3s ease;
+            z-index: 1000;
+            position: absolute; /* Absolute positioning for desktop */
+        }
+        #form {
+            top: 20px;
+            left: 20px;
         }
         #legend {
-            position: absolute;
             top: 20px;
             right: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            max-width: 250px;
-            font-size: 14px;
-            z-index: 1000;
         }
         #admin-panel {
-            position: absolute;
             bottom: 20px;
             right: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            max-width: 250px;
-            z-index: 1000;
         }
+
         /* Utility */
         .hidden { display: none !important; }
 
@@ -129,10 +121,37 @@
             font-size: 16px;
             font-weight: 600;
         }
+
+        /* ЗМІНЕНО: Медіа-запити для адаптивного дизайну */
         @media (max-width: 768px) {
-            #map { height: 80vh; }
-            #form, #legend, #admin-panel { max-width: 200px; padding: 12px; }
-            #instructions { font-size: 12px; padding: 8px 12px; left: 50px; }
+            body {
+                flex-direction: column; /* Stack elements vertically on small screens */
+            }
+            #map {
+                min-height: 60vh; /* Adjust map height on smaller screens */
+            }
+            #form, #legend, #admin-panel {
+                position: static; /* Remove absolute positioning */
+                margin: 10px auto; /* Center with margin */
+                width: calc(100% - 40px); /* Full width with padding */
+                max-width: 400px; /* Max width to prevent stretching */
+                padding: 15px;
+            }
+            #instructions {
+                position: static; /* Remove absolute positioning */
+                margin: 10px auto;
+                width: calc(100% - 40px);
+                max-width: 400px;
+                text-align: center;
+                border-radius: 8px; /* Ensure rounded corners on static elements */
+            }
+            /* Hide instructions on very small screens if needed, or adjust further */
+            @media (max-width: 480px) {
+                #instructions {
+                    font-size: 12px;
+                    padding: 8px;
+                }
+            }
         }
     </style>
 </head>
@@ -152,8 +171,8 @@
             <option value="potential">Я бачу тут потенціал</option>
             <option value="proud">Я пишаюсь цим місцем</option>
         </select>
-        <input type="text" id="name" placeholder="Назва точки">
-        <input type="text" id="description" placeholder="Опис (необов’язково)">
+        <input type="text" id="name" placeholder="Назва точки" maxlength="200">
+        <input type="text" id="description" placeholder="Опис (необов’язково)" maxlength="200">
         <button onclick="addMarkerFromForm()">Додати точку</button>
         <button onclick="cancelMarker()" style="background:#d2d2d7;color:#1d1d1f;">Скасувати</button>
     </div>
@@ -175,12 +194,12 @@
     <script>
         // Firebase configuration (ВСТАВТЕ СЮДИ ВАШІ РЕАЛЬНІ ДАНІ З FIREBASE CONSOLE!)
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", 
-            authDomain: "olks-79ce8.firebaseapp.com", 
-            projectId: "olks-79ce8", 
-            storageBucket: "olks-79ce8.firebasestorage.app", 
-            messagingSenderId: "968971749709", 
-            appId: "1:968971749709:web:8254a15b889f65bdbc0f04", 
+            apiKey: "AIzaSyAO54NkFh3DmWzcMn2LJe93uetyXY3OHJs", // ЗАМІНІТЬ НА ВАШ КЛЮЧ
+            authDomain: "olks-79ce8.firebaseapp.com", // ЗАМІНІТЬ НА ВАШ ДОМЕН
+            projectId: "olks-79ce8", // ЗАМІНІТЬ НА ID ПРОЄКТУ
+            storageBucket: "olks-79ce8.firebasestorage.app", // ЗАМІНІТЬ НА ВАШ BUCKET
+            messagingSenderId: "968971749709", // ЗАМІНІТЬ НА ВАШ SENDER ID
+            appId: "1:968971749709:web:8254a15b889f65bdbc0f04", // ЗАМІНІТЬ НА ВАШ APP ID
             // measurementId: "G-KTPEVY0WXM" // measurementId не потрібен для базової роботи Firestore
         };
 
@@ -212,7 +231,7 @@
         let isAdminMode = false;
         const ADMIN_PASSWORD = "your_strong_admin_password"; // <--- ЗМІНІТЬ ЦЕ НА СВІЙ СЕКРЕТНИЙ ПАРОЛЬ!
 
-        // ЗМІНЕНО: Більш контрастні кольори для маркерів
+        // Більш контрастні кольори для маркерів
         const CATEGORY_COLORS = {
             love: '#006400',    // Dark Green
             avoid: '#8B0000',   // Dark Red
@@ -317,7 +336,7 @@
         toggleAddMarkerMode(true); // Always in adding mode by default for participation
 
         // --- Form Functions ---
-        async function addMarkerFromForm() { // Made asynchronous
+        async function addMarkerFromForm() {
             const category = categorySelect.value;
             const name = nameInput.value.trim();
             const description = descriptionInput.value.trim();
@@ -337,7 +356,7 @@
 
             const latlng = tempMarker.getLatLng();
             
-            // --- Changed: Save to Firebase ---
+            // Save to Firebase
             const newMarkerId = await addMarkerToFirestore(latlng.lat, latlng.lng, category, name, description);
             if (newMarkerId) {
                 addMarkerToMap(latlng.lat, latlng.lng, category, name, description, newMarkerId); // Add to map after successful save
@@ -415,11 +434,11 @@
             });
         }
 
-        async function deleteMarkerById(id) { // Made asynchronous
+        async function deleteMarkerById(id) {
             if (!isAdminMode) return; // Only allow deletion in admin mode
             
             if (confirm('Ви впевнені, що хочете видалити цю точку?')) {
-                // --- Changed: Delete from Firebase ---
+                // Delete from Firebase
                 const success = await deleteMarkerFromFirestore(id);
                 if (success) {
                     const markerToDelete = markers.find(m => m.id == id);
@@ -439,7 +458,7 @@
                 isAdminMode = true;
                 toggleAddMarkerMode(false);
 
-                // ЗМІНЕНО: Правильне керування видимістю елементів адмін-панелі
+                // Правильне керування видимістю елементів адмін-панелі
                 adminPasswordInput.classList.add('hidden');
                 enterAdminBtn.classList.add('hidden');
 
@@ -461,7 +480,7 @@
         function exitAdminMode() {
             isAdminMode = false;
 
-            // ЗМІНЕНО: Правильне керування видимістю елементів адмін-панелі
+            // Правильне керування видимістю елементів адмін-панелі
             adminPasswordInput.classList.remove('hidden');
             enterAdminBtn.classList.remove('hidden');
 
@@ -508,10 +527,10 @@
             downloadAnchorNode.remove();
         }
 
-        async function deleteAllMarkers() { // Made asynchronous
+        async function deleteAllMarkers() {
             if (!isAdminMode) return;
             if (confirm('Ви впевнені, що хочете видалити ВСІ точки? Цю дію не можна скасувати!')) {
-                // --- Changed: Delete all from Firebase ---
+                // Delete all from Firebase
                 const allMarkersSnapshot = await db.collection("markers").get();
                 const batch = db.batch(); // Use batch for efficient deletion of many documents
 

@@ -121,14 +121,16 @@
             /* Панелі розміщуємо внизу, по центру, використовуючи фіксоване позиціонування */
             #form, #legend, #admin-panel {
                 position: fixed;
-                bottom: var(--panel-bottom-offset, 60px); /* Динамічна змінна для відступу знизу */
+                /* Змінено: використовуємо transformY для приховування/показу, bottom встановлюємо динамічно JS */
+                bottom: var(--panel-bottom-offset, 60px); 
                 left: 0;
                 width: 100%;
                 max-width: none;
                 border-radius: 12px 12px 0 0;
                 padding: 15px;
                 box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.1);
-                transform: translateY(100%); /* Приховати за екраном */
+                /* Змінено: замість translateY(100%) приховуємо за допомогою негативного translateY */
+                transform: translateY(calc(100% + var(--panel-bottom-offset, 60px))); /* Приховати повністю за екраном */
                 transition: transform 0.3s ease-out, bottom 0.3s ease-out; /* Анімуємо і bottom */
                 z-index: 1000; /* Під кнопками навігації */
                 max-height: calc(100vh - var(--panel-bottom-offset, 60px) - 20px); /* Обмежуємо висоту */
@@ -157,6 +159,7 @@
             }
 
             /* Приховуємо інші панелі, коли одна активна */
+            /* Змінено: Цей блок тепер лише контролює display: none, а visible клас контролює transform */
             #form:not(.visible),
             #legend:not(.visible),
             #admin-panel:not(.visible) {
@@ -488,6 +491,10 @@
                 hideAllPanels();
             }
             activePanel = null; // Скидаємо активну панель
+            // Важливо: перевіряємо, чи є активний елемент, і прибираємо фокус, щоб закрити клавіатуру
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
         }
 
         function addMarkerToMap(lat, lng, category, name, description, id) {
@@ -534,26 +541,6 @@
             });
         }
 
-        async function deleteMarkerById(id) {
-            if (!isAdminMode) {
-                alert('Ви не в режимі адміністратора. Увійдіть, щоб видалити точки.');
-                return;
-            }
-
-            if (confirm('Ви впевнені, що хочете видалити цю точку?')) {
-                const success = await deleteMarkerFromFirestore(id);
-                if (success) {
-                    const markerToDelete = markers.find(m => m.id == id);
-                    if (markerToDelete) {
-                        map.removeLayer(markerToDelete);
-                        markers = markers.filter(m => m.id != id);
-                    }
-                } else {
-                    // Помилка вже була оброблена в deleteMarkerFromFirestore
-                }
-            }
-        }
-
         async function enterAdminMode() {
             const email = adminEmailInput.value.trim();
             const password = adminPasswordInput.value.trim();
@@ -589,6 +576,10 @@
                     } else {
                         // На десктопі, якщо адмін увійшов, приховуємо форму
                         form.classList.add('hidden');
+                    }
+                    // Закриваємо клавіатуру після успішного входу
+                    if (document.activeElement) {
+                        document.activeElement.blur();
                     }
 
                 } else {
@@ -640,6 +631,10 @@
                     form.classList.remove('hidden');
                 }
                 activePanel = null; // Скидаємо активну панель
+                // Закриваємо клавіатуру
+                if (document.activeElement) {
+                    document.activeElement.blur();
+                }
 
             } catch (error) {
                 console.error("Помилка виходу: ", error.message);
@@ -730,7 +725,12 @@
         function showPanel(panelElement, buttonElement = null) {
             hideAllPanels(); // Спочатку ховаємо всі панелі та деактивуємо кнопки
             panelElement.classList.remove('hidden'); // Забезпечуємо, що елемент не має display: none
-            panelElement.classList.add('visible'); // Викликаємо анімацію
+            // Використовуємо setTimeout, щоб дати браузеру час для відображення елемента перед застосуванням transition
+            // Це може допомогти уникнути "стрибків" або некоректної анімації
+            setTimeout(() => {
+                panelElement.classList.add('visible'); // Викликаємо анімацію
+            }, 50); // Невелика затримка
+
             if (buttonElement) {
                 buttonElement.classList.add('active');
             }
@@ -761,31 +761,38 @@
         });
 
         // --- ОБРОБНИКИ ДЛЯ АДАПТАЦІЇ ПІД ВІРТУАЛЬНУ КЛАВІАТУРУ ---
+        let isKeyboardActive = false; // Додаємо прапорець стану клавіатури
+
         function adjustPanelForKeyboard(inputElement) {
             if (window.innerWidth > 768) return; // Тільки для мобільних
 
-            // Затримка, щоб клавіатура встигла з'явитися
-            setTimeout(() => {
+            // Використовуємо requestAnimationFrame для кращої синхронізації з рендерингом браузера
+            requestAnimationFrame(() => {
                 const viewportHeight = window.innerHeight; // Висота вікна перегляду
-                // VisualViewport API є надійнішим для визначення видимої області
                 const visualViewportHeight = window.visualViewport ? window.visualViewport.height : viewportHeight;
                 const keyboardHeight = viewportHeight - visualViewportHeight;
 
                 console.log(`Viewport Height: ${viewportHeight}, Visual Viewport Height: ${visualViewportHeight}, Keyboard Height: ${keyboardHeight}`);
 
-                if (keyboardHeight > 0 && activePanel) {
-                    // Клавіатура активна, піднімаємо панель
+                if (keyboardHeight > 0 && !isKeyboardActive) {
+                    // Клавіатура з'явилася
+                    isKeyboardActive = true;
                     const newBottomOffset = keyboardHeight;
                     document.documentElement.style.setProperty('--panel-bottom-offset', `${newBottomOffset}px`);
-                    // Прокручуємо до поля вводу, якщо воно не видно
-                    setTimeout(() => {
-                        inputElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    }, 100); // Невелика затримка для прокрутки після зміни позиції
-                } else {
-                    // Клавіатура неактивна, повертаємо панель на початкове місце
+
+                    // Прокручуємо до поля вводу
+                    if (inputElement && activePanel) {
+                        // Важливо: затримка для прокрутки, щоб панель встигла переміститися
+                        setTimeout(() => {
+                            inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 100);
+                    }
+                } else if (keyboardHeight === 0 && isKeyboardActive) {
+                    // Клавіатура зникла
+                    isKeyboardActive = false;
                     document.documentElement.style.setProperty('--panel-bottom-offset', `${mobileNavHeight}px`);
                 }
-            }, 100); // Затримка для отримання коректної висоти клавіатури
+            });
         }
 
         // Додаємо обробники focus/blur до всіх ввідних полів, що можуть викликати клавіатуру
@@ -794,25 +801,26 @@
         textInputs.forEach(input => {
             input.addEventListener('focus', (e) => {
                 console.log('Input focused:', e.target.id);
-                adjustPanelForKeyboard(e.target);
+                // Затримка перед adjustPanelForKeyboard, щоб дозволити UI відреагувати на фокус
+                setTimeout(() => adjustPanelForKeyboard(e.target), 50);
             });
 
             input.addEventListener('blur', () => {
                 console.log('Input blurred');
-                adjustPanelForKeyboard(null); // Скидаємо позицію
+                // Затримка перед adjustPanelForKeyboard для обробки зникнення клавіатури
+                setTimeout(() => adjustPanelForKeyboard(null), 50);
             });
         });
 
         // Слухаємо зміни розміру візуального вікна (для адаптації під клавіатуру на iOS/Android)
         if (window.visualViewport) {
             window.visualViewport.addEventListener('resize', () => {
-                // Якщо клавіатура з'являється/зникає, adjustPanelForKeyboard спрацює
-                // Викликаємо її тільки якщо є активне поле вводу
+                // Викликаємо adjustPanelForKeyboard, якщо є активне поле вводу
                 const activeElement = document.activeElement;
-                if (textInputs.includes(activeElement)) {
+                if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'SELECT')) {
                     adjustPanelForKeyboard(activeElement);
-                } else if (!activeElement || (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA' && activeElement.tagName !== 'SELECT')) {
-                    // Якщо немає активного поля вводу або це не текстове поле, скидаємо offset
+                } else {
+                    // Якщо немає активного поля вводу, або фокус зник, повертаємо панель
                     adjustPanelForKeyboard(null);
                 }
             });

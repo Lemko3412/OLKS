@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaflet Interactive Map</title>
+    <title>Емоційна мапа</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap">
     <style>
@@ -165,8 +165,8 @@
     </div>
 
     <div id="admin-panel">
-        <h3>Адмін-режим</h3>
-        <input type="email" id="admin-email" placeholder="Введіть Email адміна"> <input type="password" id="admin-password" placeholder="Введіть пароль">
+        <h3>Режим відладки</h3>
+        <input type="email" id="admin-email" placeholder="Введіть пошту"> <input type="password" id="admin-password" placeholder="Введіть пароль">
         <button onclick="enterAdminMode()" id="enter-admin">Увійти</button>
         <button onclick="exitAdminMode()" id="exit-admin" class="hidden">Вийти</button>
         <button onclick="exportGeoJSON()" id="export-geojson" class="hidden">Експорт у GeoJSON</button>

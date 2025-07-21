@@ -80,7 +80,7 @@
             border-radius: 50%;
         }
         /* Adjusted selectors for input types to be more specific */
-        select, input[type="text"], input[type="password"], textarea { /* ЗМІНЕНО: Додано textarea */
+        select, input[type="text"], input[type="password"], textarea {
             width: 100%;
             padding: 10px;
             margin: 8px 0;
@@ -90,10 +90,10 @@
             background: #fff;
             outline: none;
             transition: border-color 0.2s ease;
-            resize: vertical; /* ЗМІНЕНО: Дозволяє зміну розміру textarea по вертикалі */
-            min-height: 60px; /* ЗМІНЕНО: Мінімальна висота для textarea */
+            resize: vertical;
+            min-height: 60px;
         }
-        select:focus, input[type="text"]:focus, input[type="password"]:focus, textarea:focus { /* ЗМІНЕНО: Додано textarea */
+        select:focus, input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
             border-color: #007aff; /* iOS blue accent */
         }
         button {
@@ -122,6 +122,21 @@
             margin: 0 0 8px;
             font-size: 16px;
             font-weight: 600;
+        }
+
+        /* ЗМІНЕНО: СТИЛІ ДЛЯ POPUP МАРКЕРІВ */
+        /* Обмеження ширини для контенту попапу */
+        .leaflet-popup-content {
+            max-width: 250px; /* Або будь-яка інша бажана максимальна ширина */
+        }
+
+        /* Перенесення тексту для абзаців в попапі */
+        .leaflet-popup-content p {
+            word-wrap: break-word; /* Дозволяє переносити довгі слова */
+            overflow-wrap: break-word; /* Сучасний аналог word-wrap */
+            white-space: pre-wrap; /* Зберігає пробіли та переноси рядків */
+            margin-bottom: 8px; /* Невеликий відступ між абзацами */
+            line-height: 1.4; /* Міжрядковий інтервал для кращої читабельності */
         }
 
         /* Медіа-запити для адаптивного дизайну */
@@ -412,7 +427,7 @@
             let popupContent = `
                 <h4>${name}</h4>
                 <p><strong>Категорія:</strong> ${category}</p>
-                ${description ? `<p>${description}</p>` : ''}
+                ${description ? `<p class="marker-description-text">${description}</p>` : ''} 
             `;
             
             // Add delete button only if in admin mode
@@ -434,7 +449,7 @@
                 let popupContent = `
                     <h4>${marker.name}</h4>
                     <p><strong>Категорія:</strong> ${marker.category}</p>
-                    ${marker.description ? `<p>${marker.description}</p>` : ''}
+                    ${marker.description ? `<p class="marker-description-text">${marker.description}</p>` : ''}
                 `;
                 if (isAdminMode) {
                     popupContent += `<button class="delete-button" onclick="deleteMarkerById('${marker.id}')">Видалити</button>`;

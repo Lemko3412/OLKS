@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
     <title>Емоційна мапа</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap">
@@ -121,7 +121,7 @@
             /* Панелі розміщуємо внизу, по центру, використовуючи фіксоване позиціонування */
             #form, #legend, #admin-panel {
                 position: fixed;
-                bottom: var(--mobile-nav-height, 60px); /* Піднімаємо на висоту навігаційної панелі */
+                bottom: var(--panel-bottom-offset, 60px); /* Динамічна змінна для відступу знизу */
                 left: 0;
                 width: 100%;
                 max-width: none;
@@ -129,19 +129,14 @@
                 padding: 15px;
                 box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.1);
                 transform: translateY(100%); /* Приховати за екраном */
-                transition: transform 0.3s ease-out;
+                transition: transform 0.3s ease-out, bottom 0.3s ease-out; /* Анімуємо і bottom */
                 z-index: 1000; /* Під кнопками навігації */
-                max-height: calc(100vh - var(--mobile-nav-height, 60px) - 20px); /* Обмежуємо висоту, щоб не вилазили за екран, -20px для відступу зверху */
+                max-height: calc(100vh - var(--panel-bottom-offset, 60px) - 20px); /* Обмежуємо висоту */
                 overflow-y: auto; /* Додаємо прокрутку, якщо вміст більший */
             }
 
             #form.visible, #legend.visible, #admin-panel.visible {
                 transform: translateY(0); /* Показати панель */
-            }
-
-            /* Це важливо: додаємо правило, щоб форма залишалася видимою, коли поле вводу у фокусі */
-            #form.visible.focused-input {
-                transform: translateY(0) !important; /* Примусово залишаємо її видимої */
             }
 
             /* Інструкції */
@@ -150,8 +145,11 @@
                 top: 10px;
                 left: 50%;
                 transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.7); /* Повертаємо стиль */
+                color: white; /* Повертаємо стиль */
+                padding: 8px 12px; /* Повертаємо стиль */
+                border-radius: 8px; /* Повертаємо стиль */
                 font-size: 12px;
-                padding: 8px 12px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -316,13 +314,16 @@
         const showAdminBtn = document.getElementById('show-admin-btn');
         const mobileNavButtons = document.querySelector('.mobile-nav-buttons');
 
-        // Визначаємо висоту мобільної навігаційної смуги як CSS змінну
-        document.documentElement.style.setProperty('--mobile-nav-height', '60px'); // Відповідає height у CSS
+        // Визначаємо початкову висоту мобільної навігаційної смуги як CSS змінну
+        const mobileNavHeight = 60; // px
+        document.documentElement.style.setProperty('--mobile-nav-height', `${mobileNavHeight}px`);
+        document.documentElement.style.setProperty('--panel-bottom-offset', `${mobileNavHeight}px`); // Початковий відступ
 
         let tempMarker = null;
         let markers = [];
         let isAddingMarker = true;
         let isAdminMode = false;
+        let activePanel = null; // Зберігаємо посилання на поточну активну панель
 
         const CATEGORY_COLORS = {
             love: '#006400',
@@ -469,6 +470,9 @@
         }
 
         function cancelMarker() {
+            // Скидаємо bottom offset для панелей
+            document.documentElement.style.setProperty('--panel-bottom-offset', `${mobileNavHeight}px`);
+
             form.classList.remove('visible'); // Видаляємо клас 'visible'
             form.classList.add('hidden'); // Додаємо 'hidden' назад для десктопу
 
@@ -481,10 +485,9 @@
             }
             instructions.textContent = 'Клікніть на мапу, щоб обрати локацію для нової точки.';
             if (window.innerWidth <= 768) {
-                // При скасуванні, якщо ми на мобільному, просто приховати панель, але залишити кнопки навігації
-                hideAllPanels(); // Приховуємо всі панелі
-                // Не скидаємо активний стан з кнопок мобільної навігації автоматично тут
+                hideAllPanels();
             }
+            activePanel = null; // Скидаємо активну панель
         }
 
         function addMarkerToMap(lat, lng, category, name, description, id) {
@@ -632,12 +635,11 @@
 
                 if (window.innerWidth <= 768) {
                     hideAllPanels(); // Приховуємо всі панелі
-                    // При виході з адмін-режиму на мобільних, логічно показати форму додавання точок або мапу.
-                    // Можемо залишити просто мапу з інструкціями.
                 } else {
                     // На десктопі, після виходу з адміна, знову показуємо форму
                     form.classList.remove('hidden');
                 }
+                activePanel = null; // Скидаємо активну панель
 
             } catch (error) {
                 console.error("Помилка виходу: ", error.message);
@@ -717,10 +719,12 @@
             legend.classList.remove('visible');
             adminPanel.classList.remove('visible');
             document.querySelectorAll('.mobile-nav-buttons button').forEach(btn => btn.classList.remove('active'));
-            // Після приховання всіх панелей, показуємо інструкції (якщо не в адмін-режимі)
             if (!isAdminMode) {
                 instructions.classList.remove('hidden');
             }
+            // Скидаємо bottom offset, коли всі панелі приховані
+            document.documentElement.style.setProperty('--panel-bottom-offset', `${mobileNavHeight}px`);
+            activePanel = null;
         }
 
         function showPanel(panelElement, buttonElement = null) {
@@ -731,9 +735,10 @@
                 buttonElement.classList.add('active');
             }
             instructions.classList.add('hidden'); // Приховуємо інструкції, коли панель активна
+            activePanel = panelElement; // Зберігаємо активну панель
         }
 
-        // Додаємо обробники подій для мобільних кнопок
+        // Обробники подій для мобільних кнопок
         showFormBtn.addEventListener('click', () => {
             showPanel(form, showFormBtn);
             toggleAddMarkerMode(true); // Дозволяємо додавати точки
@@ -755,40 +760,64 @@
             }
         });
 
-        // --- НОВІ ОБРОБНИКИ ДЛЯ ПОЛІВ ВВЕДЕННЯ ---
-        nameInput.addEventListener('focus', () => {
-            if (window.innerWidth <= 768) {
-                form.classList.add('focused-input'); // Додаємо клас, щоб запобігти приховуванню на мобільних
-            }
-        });
-        nameInput.addEventListener('blur', () => {
-            if (window.innerWidth <= 768) {
-                form.classList.remove('focused-input'); // Видаляємо клас
-            }
+        // --- ОБРОБНИКИ ДЛЯ АДАПТАЦІЇ ПІД ВІРТУАЛЬНУ КЛАВІАТУРУ ---
+        function adjustPanelForKeyboard(inputElement) {
+            if (window.innerWidth > 768) return; // Тільки для мобільних
+
+            // Затримка, щоб клавіатура встигла з'явитися
+            setTimeout(() => {
+                const viewportHeight = window.innerHeight; // Висота вікна перегляду
+                // VisualViewport API є надійнішим для визначення видимої області
+                const visualViewportHeight = window.visualViewport ? window.visualViewport.height : viewportHeight;
+                const keyboardHeight = viewportHeight - visualViewportHeight;
+
+                console.log(`Viewport Height: ${viewportHeight}, Visual Viewport Height: ${visualViewportHeight}, Keyboard Height: ${keyboardHeight}`);
+
+                if (keyboardHeight > 0 && activePanel) {
+                    // Клавіатура активна, піднімаємо панель
+                    const newBottomOffset = keyboardHeight;
+                    document.documentElement.style.setProperty('--panel-bottom-offset', `${newBottomOffset}px`);
+                    // Прокручуємо до поля вводу, якщо воно не видно
+                    setTimeout(() => {
+                        inputElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 100); // Невелика затримка для прокрутки після зміни позиції
+                } else {
+                    // Клавіатура неактивна, повертаємо панель на початкове місце
+                    document.documentElement.style.setProperty('--panel-bottom-offset', `${mobileNavHeight}px`);
+                }
+            }, 100); // Затримка для отримання коректної висоти клавіатури
+        }
+
+        // Додаємо обробники focus/blur до всіх ввідних полів, що можуть викликати клавіатуру
+        const textInputs = [nameInput, descriptionInput, adminEmailInput, adminPasswordInput, categorySelect];
+
+        textInputs.forEach(input => {
+            input.addEventListener('focus', (e) => {
+                console.log('Input focused:', e.target.id);
+                adjustPanelForKeyboard(e.target);
+            });
+
+            input.addEventListener('blur', () => {
+                console.log('Input blurred');
+                adjustPanelForKeyboard(null); // Скидаємо позицію
+            });
         });
 
-        descriptionInput.addEventListener('focus', () => {
-            if (window.innerWidth <= 768) {
-                form.classList.add('focused-input');
-            }
-        });
-        descriptionInput.addEventListener('blur', () => {
-            if (window.innerWidth <= 768) {
-                form.classList.remove('focused-input');
-            }
-        });
-
-        categorySelect.addEventListener('focus', () => {
-            if (window.innerWidth <= 768) {
-                form.classList.add('focused-input');
-            }
-        });
-        categorySelect.addEventListener('blur', () => {
-            if (window.innerWidth <= 768) {
-                form.classList.remove('focused-input');
-            }
-        });
-        // --- КІНЕЦЬ НОВИХ ОБРОБНИКІВ ---
+        // Слухаємо зміни розміру візуального вікна (для адаптації під клавіатуру на iOS/Android)
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                // Якщо клавіатура з'являється/зникає, adjustPanelForKeyboard спрацює
+                // Викликаємо її тільки якщо є активне поле вводу
+                const activeElement = document.activeElement;
+                if (textInputs.includes(activeElement)) {
+                    adjustPanelForKeyboard(activeElement);
+                } else if (!activeElement || (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA' && activeElement.tagName !== 'SELECT')) {
+                    // Якщо немає активного поля вводу або це не текстове поле, скидаємо offset
+                    adjustPanelForKeyboard(null);
+                }
+            });
+        }
+        // --- КІНЕЦЬ ОБРОБНИКІВ КЛАВІАТУРИ ---
 
         loadMarkersFromFirestore();
 
@@ -836,8 +865,6 @@
 
                 if (window.innerWidth <= 768) {
                     hideAllPanels(); // При виході з системи приховуємо всі панелі
-                    // І автоматично показуємо інструкції, оскільки користувач не в адмін-режимі
-                    instructions.classList.remove('hidden');
                 }
             }
         });
@@ -846,7 +873,6 @@
         window.addEventListener('load', () => {
             if (window.innerWidth <= 768) {
                 hideAllPanels(); // На мобільних спочатку всі панелі приховані
-                // Кнопки навігації завжди видимі на мобільних, немає потреби їх приховувати/показувати тут.
             } else {
                 form.classList.remove('hidden');
                 legend.classList.remove('hidden');
@@ -858,7 +884,7 @@
             }
         });
 
-        // Перемикаємо відображення панелей при зміні розміру вікна
+        // Перемикаємо відображення панелей при зміні розміру вікна (наприклад, поворот екрану)
         window.addEventListener('resize', () => {
             if (window.innerWidth <= 768) {
                 hideAllPanels(); // Приховати всі панелі при зміні розміру на мобільний
@@ -872,6 +898,8 @@
             if (!isAdminMode) {
                 toggleAddMarkerMode(true);
             }
+            // Скидаємо offset клавіатури при зміні розміру (наприклад, поворот пристрою)
+            document.documentElement.style.setProperty('--panel-bottom-offset', `${mobileNavHeight}px`);
         });
     </script>
 </body>

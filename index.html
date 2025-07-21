@@ -16,7 +16,6 @@
             font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #f5f5f7; /* Light grey Apple‑style background */
             color: #1d1d1f;
-            /* Важливо для корекції масштабування: встановити display: flex, щоб body не створював зайвого простору */
             display: flex; 
             flex-direction: column;
             min-height: 100vh; /* Забезпечити, що body займає всю доступну висоту */
@@ -152,7 +151,11 @@
     <div id="instructions">Клікніть на мапу, щоб обрати локацію для нової точки.</div>
     <div id="legend">
         <h4>Легенда</h4>
-        <div class="legend-item"><div class="legend-color" style="background: #006400;"></div>Я люблю проводити тут час</div> <div class="legend-item"><div class="legend-color" style="background: #8B0000;"></div>Я уникаю це місце</div> <div class="legend-item"><div class="legend-color" style="background: #008B8B;"></div>Я бачу тут потенціал</div> <div class="legend-item"><div class="legend-color" style="background: #B8860B;"></div>Я пишаюсь цим місцем</div> </div>
+        <div class="legend-item"><div class="legend-color" style="background: #006400;"></div>Я люблю проводити тут час</div>
+        <div class="legend-item"><div class="legend-color" style="background: #8B0000;"></div>Я уникаю це місце</div>
+        <div class="legend-item"><div class="legend-color" style="background: #008B8B;"></div>Я бачу тут потенціал</div>
+        <div class="legend-item"><div class="legend-color" style="background: #B8860B;"></div>Я пишаюсь цим місцем</div>
+    </div>
 
     <div id="form" class="hidden">
         <h3>Додати точку</h3>
@@ -171,7 +174,8 @@
 
     <div id="admin-panel">
         <h3>Режим відладки</h3>
-        <input type="email" id="admin-email" placeholder="Введіть пошту"> <input type="password" id="admin-password" placeholder="Введіть пароль">
+        <input type="email" id="admin-email" placeholder="Введіть пошту">
+        <input type="password" id="admin-password" placeholder="Введіть пароль">
         <button onclick="enterAdminMode()" id="enter-admin">Увійти</button>
         <button onclick="exitAdminMode()" id="exit-admin" class="hidden">Вийти</button>
         <button onclick="exportGeoJSON()" id="export-geojson" class="hidden">Експорт у GeoJSON</button>
@@ -655,51 +659,32 @@
             toggleAddMarkerMode(true);
         }
 
-        // --- JavaScript для корекції масштабування в iframe (НОВЕ ДОПОВНЕННЯ) ---
+        // --- JavaScript для корекції масштабування в iframe (ОНОВЛЕНО) ---
         function adjustForIframeScaling() {
             if (window.self !== window.top) { // Перевіряємо, чи ми в iframe
                 const readymagScaleFactor = 1.5; // Ми знаємо, що Readymag масштабує на 150%
                 const desiredScaleFactor = 1 / readymagScaleFactor; // Нам потрібно компенсувати це
 
-                const mapElement = document.getElementById('map');
-                const formElement = document.getElementById('form');
-                const legendElement = document.getElementById('legend');
-                const adminPanelElement = document.getElementById('admin-panel');
-                const instructionsElement = document.getElementById('instructions');
                 const body = document.body;
 
-                // Застосовуємо зворотне масштабування до батьківського елемента, який містить основний контент
-                // Це має бути body, оскільки він містить #map та інші елементи
                 if (body) {
                     body.style.transform = `scale(${desiredScaleFactor})`;
-                    body.style.transformOrigin = 'top left'; // Масштабуємо від верхнього лівого кута
-                    // Збільшуємо розміри body, щоб після застосування transform: scale() він займав потрібне місце
-                    // Це важливо, щоб вміст не обрізався
+                    body.style.transformOrigin = 'top left'; 
                     body.style.width = `${100 / desiredScaleFactor}%`;
-                    body.style.height = `${100 / desiredScaleFactor}vh`; // Використовуємо vh, бо #map має vh
-                    // Вимкніть overflow: hidden на body, якщо він є, щоб уникнути обрізання
+                    // РЯДОК body.style.height = ...; БІЛЬШЕ НЕ ПОТРІБЕН, ВІН СТВОРЮВАВ ПРОКРУТКУ
                     body.style.overflow = 'visible'; 
                 }
 
-                // Оновлюємо розмір карти Leaflet після застосування трансформації
                 if (map) {
                     map.invalidateSize();
                 }
-
-                // Також варто перевірити позицію абсолютних елементів, бо вони можуть з'їхати
-                // Їх також потрібно масштабувати або перераховувати їхні позиції
-                // Це може вимагати додаткового налаштування, якщо вони не виглядають коректно після базового масштабування body
-                // Наприклад, для #form, #legend, #admin-panel, #instructions, їхні top/left/right/bottom/transform: translateX
-                // можуть бути перераховані або також масштабовані.
-                // Для простоти, спробуємо покластися на масштабування body.
             }
         }
 
         // Запускаємо функцію після завантаження сторінки та після деякої затримки
         window.addEventListener('load', adjustForIframeScaling);
         // Додатково, з невеликою затримкою, щоб переконатися, що всі стилі Readymag застосовані
-        setTimeout(adjustForIframeScaling, 750); // Збільшив затримку на всяк випадок
-
+        setTimeout(adjustForIframeScaling, 750); 
     </script>
 </body>
 </html>

@@ -182,7 +182,7 @@
     <script>
         // Firebase configuration (ВСТАВТЕ СЮДИ ВАШІ РЕАЛЬНІ ДАНІ З FIREBASE CONSOLE!)
         const firebaseConfig = {
-            apiKey: "AIzaSyAO54NkFh3DmWzcMn2LJe93uetyXY3OHJs", 
+            apiKey: "AIzaSyAO54NkFh3DmWzcMn2LJe93uetyXY3OHJs", // ЗАМІНІТЬ НА ВАШ РЕАЛЬНИЙ API KEY
             authDomain: "olks-79ce8.firebaseapp.com", 
             projectId: "olks-79ce8", 
             storageBucket: "olks-79ce8.firebasestorage.app", 
@@ -196,7 +196,7 @@
         const db = firebase.firestore(); // Get a reference to the Firestore database
         const auth = firebase.auth(); // Get a reference to the Firebase Auth service
 
-        // ЗМІНЕНО: Центрування мапи на місто Олександрія, Кіровоградської області (приблизні координати)
+        // Центрування мапи на місто Олександрія, Кіровоградської області (приблизні координати)
         const map = L.map('map').setView([48.645, 33.119], 13); // Latitude, Longitude, Zoom level
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -208,7 +208,7 @@
         const descriptionInput = document.getElementById('description');
         const instructions = document.getElementById('instructions');
         const adminPanel = document.getElementById('admin-panel');
-        const adminEmailInput = document.getElementById('admin-email'); // Новий елемент
+        const adminEmailInput = document.getElementById('admin-email');
         const adminPasswordInput = document.getElementById('admin-password');
         const enterAdminBtn = document.getElementById('enter-admin');
         const exitAdminBtn = document.getElementById('exit-admin');
@@ -217,11 +217,9 @@
 
         let tempMarker = null; // Temporary marker for placement
         let markers = []; // Array to store all L.Marker objects
-        let isAddingMarker = false;
+        let isAddingMarker = true; // ЗМІНЕНО: Дозволяємо додавати за замовчуванням
         let isAdminMode = false;
-        // ADMIN_PASSWORD більше не потрібен тут, авторизація відбувається через Firebase Auth
 
-        // ЗМІНЕНО: Більш контрастні кольори для маркерів
         const CATEGORY_COLORS = {
             love: '#006400',    // Dark Green
             avoid: '#8B0000',   // Dark Red
@@ -244,27 +242,25 @@
 
         // Функція для додавання маркера в Firestore
         async function addMarkerToFirestore(lat, lng, category, name, description) {
-            // Перевіряємо, чи користувач авторизований, перед додаванням
-            if (auth.currentUser) {
-                try {
-                    const docRef = await db.collection("markers").add({
-                        lat: lat,
-                        lng: lng,
-                        category: category,
-                        name: name,
-                        description: description,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp(), // Додаємо мітку часу
-                        userId: auth.currentUser.uid // Зберігаємо ID користувача, який створив маркер
-                    });
-                    console.log("Документ успішно додано з ID: ", docRef.id);
-                    return docRef.id; // Повертаємо ID, який присвоїв Firestore
-                } catch (e) {
-                    console.error("Помилка додавання документа: ", e);
-                    alert("Помилка додавання точки. Перевірте, чи ви увійшли в систему, якщо це вимагається правилами.");
-                    return null;
-                }
-            } else {
-                alert("Ви не авторизовані для додавання точок.");
+            // Тепер не перевіряємо auth.currentUser тут, тому що правила дозволяють створювати всім
+            // Якщо потрібен userId, то можна його додати, якщо користувач авторизований, інакше null
+            const userId = auth.currentUser ? auth.currentUser.uid : null;
+
+            try {
+                const docRef = await db.collection("markers").add({
+                    lat: lat,
+                    lng: lng,
+                    category: category,
+                    name: name,
+                    description: description,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(), // Додаємо мітку часу
+                    userId: userId // Зберігаємо ID користувача, якщо він увійшов, інакше null
+                });
+                console.log("Документ успішно додано з ID: ", docRef.id);
+                return docRef.id; // Повертаємо ID, який присвоїв Firestore
+            } catch (e) {
+                console.error("Помилка додавання документа: ", e);
+                alert("Помилка додавання точки. Спробуйте ще раз.");
                 return null;
             }
         }
@@ -307,8 +303,8 @@
 
         // --- Map Interaction ---
         map.on('click', function(e) {
-            // Дозволяємо додавати маркер лише якщо користувач авторизований
-            if (isAddingMarker && auth.currentUser) {
+            // ЗМІНЕНО: Тепер не перевіряємо auth.currentUser тут
+            if (isAddingMarker) { 
                 if (tempMarker) {
                     map.removeLayer(tempMarker); // Remove previous temp marker if exists
                 }
@@ -319,9 +315,8 @@
                 });
                 instructions.textContent = `Обрана локація: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}. Оберіть категорію.`;
                 form.classList.remove('hidden');
-            } else if (!auth.currentUser) {
-                alert('Будь ласка, увійдіть в систему, щоб додавати точки.');
-            }
+            } 
+            // else if (!auth.currentUser) { alert('Будь ласка, увійдіть в систему, щоб додавати точки.'); } // Цей блок більше не потрібен
         });
 
         // Toggle instruction message when adding a marker
@@ -341,17 +336,19 @@
         }
 
         // Initial call to enable adding
-        // enable adding only if a user is logged in
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                toggleAddMarkerMode(true);
-            } else {
-                toggleAddMarkerMode(false); // Disable adding if not logged in
-                // Optionally show a message that they need to log in to add markers
-                instructions.textContent = 'Увійдіть в систему, щоб додавати точки.';
-                instructions.classList.remove('hidden');
-            }
-        });
+        // ЗМІНЕНО: isAddingMarker = true; тепер відбувається один раз при завантаженні
+        // і не залежить від стану авторизації користувача
+        // Цей auth.onAuthStateChanged буде тільки для адмін-логіки
+        // auth.onAuthStateChanged(user => { // Цей блок тепер лише для адмін-панелі
+        //     if (user) {
+        //         toggleAddMarkerMode(true); // Можна прибрати, бо isAddingMarker вже true
+        //     } else {
+        //         toggleAddMarkerMode(false); // Цей блок більше не актуальний для створення
+        //         instructions.textContent = 'Увійдіть в систему, щоб додавати точки.';
+        //         instructions.classList.remove('hidden');
+        //     }
+        // });
+
 
         // --- Form Functions ---
         async function addMarkerFromForm() { // Made asynchronous
@@ -485,17 +482,15 @@
             }
 
             try {
-                // Спроба входу через Firebase Authentication
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 const user = userCredential.user;
+                
+                // ЗАМІНІТЬ НА ВАШ РЕАЛЬНИЙ EMAIL АДМІНІСТРАТОРА
+                const adminEmail = "mrqwinq@gmail.com"; 
 
-                // Перевірка, чи користувач є адміністратором (наприклад, за email)
-                // Ця перевірка email на клієнті ДОПОВНЮЄ правила безпеки Firestore, які є ОСНОВНИМИ.
-                // Не покладайтеся тільки на цю клієнтську перевірку для безпеки.
-                const adminEmail = "mrqwinq@gmail.com"; // ЗАМІНІТЬ НА ВАШ EMAIL АДМІНІСТРАТОРА
                 if (user.email === adminEmail) {
                     isAdminMode = true;
-                    toggleAddMarkerMode(false); // Адмін не додає маркери з основного інтерфейсу
+                    toggleAddMarkerMode(false); // Адмін в режимі адміна не додає маркери з основного інтерфейсу
 
                     adminEmailInput.classList.add('hidden');
                     adminPasswordInput.classList.add('hidden');
@@ -510,7 +505,6 @@
                     updateAllMarkerPopups(); // Оновити попапи, щоб показати кнопки видалення
                     alert('Успішний вхід в адмін-режим!');
                 } else {
-                    // Якщо вхід успішний, але це не адмінський акаунт
                     await auth.signOut(); // Вийти з системи
                     alert('Доступ заборонено. Тільки адміністратори можуть увійти.');
                 }
@@ -547,7 +541,7 @@
                 exportGeoJSONBtn.classList.add('hidden');
                 deleteAllBtn.classList.add('hidden');
                 
-                toggleAddMarkerMode(true); // Re-enable user adding markers
+                toggleAddMarkerMode(true); // ЗМІНЕНО: При виході з адміна, знову дозволяємо додавати звичайним користувачам
 
                 updateAllMarkerPopups(); // Оновити попапи, щоб приховати кнопки видалення
                 alert('Ви вийшли з адмін-режиму.');
@@ -558,7 +552,6 @@
         }
 
         function exportGeoJSON() {
-            // Експорт GeoJSON доступний лише в адмін-режимі
             if (!isAdminMode) {
                 alert('Ви не в режимі адміністратора, щоб експортувати дані.');
                 return;
@@ -572,7 +565,7 @@
                         "category": marker.category,
                         "name": marker.name,
                         "description": marker.description,
-                        "color": CATEGORY_COLORS && CATEGORY_COLORS.hasOwnProperty(marker.category) ? CATEGORY_COLORS[marker.category] : 'gray' // Safe access to colors
+                        "color": CATEGORY_COLORS && CATEGORY_COLORS.hasOwnProperty(marker.category) ? CATEGORY_COLORS[marker.category] : 'gray'
                     },
                     "geometry": {
                         "type": "Point",
@@ -590,13 +583,12 @@
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
             downloadAnchorNode.setAttribute("download", "map_data.geojson");
-            document.body.appendChild(downloadAnchorNode); // Required for Firefox
+            document.body.appendChild(downloadAnchorNode);
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
         }
 
         async function deleteAllMarkers() { // Made asynchronous
-            // Видалення всіх маркерів доступне лише в адмін-режимі, і захищене правилами Firebase
             if (!isAdminMode) {
                 alert('Ви не в режимі адміністратора, щоб видалити всі точки.');
                 return;
@@ -616,7 +608,6 @@
                     alert('Всі точки видалено!');
                 } catch (e) {
                     console.error("Помилка при видаленні всіх точок: ", e);
-                    // Перевірка на permission-denied також тут
                     if (e.code === 'permission-denied') {
                         alert('У вас немає дозволу на видалення всіх точок. Переконайтеся, що ви увійшли як адміністратор.');
                     } else {
@@ -630,17 +621,14 @@
         loadMarkersFromFirestore();
 
         // Слухаємо зміни стану авторизації Firebase
+        // Цей блок тепер в основному відповідає за адмін-панель
         auth.onAuthStateChanged(user => {
             if (user) {
                 console.log("Користувач увійшов: ", user.email);
-                // Тут можна додати логіку для оновлення UI, якщо потрібно
-                // Наприклад, приховувати/показувати форму додавання точок для звичайних користувачів
-                // (що ми вже робимо через toggleAddMarkerMode)
-
-                // Оновлюємо isAdminMode на основі email поточного користувача
-                const adminEmail = "admin@yourdomain.com"; // ЗАМІНІТЬ НА ВАШ EMAIL АДМІНІСТРАТОРА
+                const adminEmail = "mrqwinq@gmail.com"; // ВАШ РЕАЛЬНИЙ EMAIL АДМІНІСТРАТОРА
                 if (user.email === adminEmail) {
                     isAdminMode = true;
+                    toggleAddMarkerMode(false); // Адмін в режимі адміна не додає маркери з основного інтерфейсу
                     // Оновлення UI адмін-панелі при перезавантаженні сторінки, якщо адмін був увійшов
                     adminEmailInput.classList.add('hidden');
                     adminPasswordInput.classList.add('hidden');
@@ -653,6 +641,7 @@
                     instructions.classList.add('hidden');
                 } else {
                     isAdminMode = false;
+                    toggleAddMarkerMode(true); // Звичайний користувач увійшов - дозволяємо додавати
                 }
                 updateAllMarkerPopups(); // Оновлюємо попапи, щоб показати/приховати кнопку видалення
             } else {
@@ -667,11 +656,17 @@
                 exportGeoJSONBtn.classList.add('hidden');
                 deleteAllBtn.classList.add('hidden');
 
-                // Переводимо у режим додавання для звичайних користувачів
-                toggleAddMarkerMode(true); 
+                toggleAddMarkerMode(true); // ЗМІНЕНО: Неавторизований користувач - дозволяємо додавати
                 updateAllMarkerPopups(); // Оновлюємо попапи, щоб приховати кнопки видалення
             }
         });
+
+        // Забезпечуємо, що інструкції для додавання завжди видимі при завантаженні (якщо не в адмін-режимі)
+        // Це спрацює на початку, до того як auth.onAuthStateChanged спрацює,
+        // а потім auth.onAuthStateChanged перевірить, чи це адмін, і змінить стан, якщо потрібно.
+        if (!isAdminMode) { // Переконаємось, що ми не в адмін режимі за замовчуванням
+             toggleAddMarkerMode(true);
+        }
     </script>
 </body>
 </html>

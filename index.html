@@ -141,11 +141,7 @@
     <div id="instructions">Клікніть на мапу, щоб обрати локацію для нової точки.</div>
     <div id="legend">
         <h4>Легенда</h4>
-        <div class="legend-item"><div class="legend-color" style="background: #006400;"></div>Я люблю проводити тут час</div>
-        <div class="legend-item"><div class="legend-color" style="background: #8B0000;"></div>Я уникаю це місце</div>
-        <div class="legend-item"><div class="legend-color" style="background: #008B8B;"></div>Я бачу тут потенціал</div>
-        <div class="legend-item"><div class="legend-color" style="background: #B8860B;"></div>Я пишаюсь цим місцем</div>
-    </div>
+        <div class="legend-item"><div class="legend-color" style="background: #006400;"></div>Я люблю проводити тут час</div> <div class="legend-item"><div class="legend-color" style="background: #8B0000;"></div>Я уникаю це місце</div> <div class="legend-item"><div class="legend-color" style="background: #008B8B;"></div>Я бачу тут потенціал</div> <div class="legend-item"><div class="legend-color" style="background: #B8860B;"></div>Я пишаюсь цим місцем</div> </div>
 
     <div id="form" class="hidden">
         <h3>Додати точку</h3>
@@ -168,9 +164,11 @@
         <button onclick="enterAdminMode()" id="enter-admin">Увійти</button>
         <button onclick="exitAdminMode()" id="exit-admin" class="hidden">Вийти</button>
         <button onclick="exportGeoJSON()" id="export-geojson" class="hidden">Експорт у GeoJSON</button>
-        </div>
+        <button onclick="deleteAllMarkers()" id="delete-all" class="hidden delete-button">Видалити всі маркери</button>
+    </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
@@ -206,7 +204,7 @@
         const enterAdminBtn = document.getElementById('enter-admin');
         const exitAdminBtn = document.getElementById('exit-admin');
         const exportGeoJSONBtn = document.getElementById('export-geojson');
-        // const deleteAllBtn = document.getElementById('delete-all'); // This line is no longer needed
+        const deleteAllBtn = document.getElementById('delete-all');
 
         let tempMarker = null; // Temporary marker for placement
         let markers = []; // Array to store all L.Marker objects
@@ -271,18 +269,17 @@
             }
         }
 
-        // Функція для видалення маркера з Firestore (ОБКЛАДКА)
-        // Ця функція більше не викликається, але залишена для повноти, якщо її потрібно буде додати назад
-        // async function deleteMarkerFromFirestore(id) {
-        //     try {
-        //         await db.collection("markers").doc(id).delete();
-        //         console.log("Документ успішно видалено!");
-        //         return true;
-        //     } catch (e) {
-        //         console.error("Помилка видалення документа: ", e);
-        //         return false;
-        //     }
-        // }
+        // Функція для видалення маркера з Firestore
+        async function deleteMarkerFromFirestore(id) {
+            try {
+                await db.collection("markers").doc(id).delete();
+                console.log("Документ успішно видалено!");
+                return true;
+            } catch (e) {
+                console.error("Помилка видалення документа: ", e);
+                return false;
+            }
+        }
 
         // --- Map Interaction ---
         map.on('click', function(e) {
@@ -390,7 +387,10 @@
                 ${description ? `<p>${description}</p>` : ''}
             `;
             
-            // The delete button for individual markers is no longer added
+            // Add delete button only if in admin mode
+            if (isAdminMode) {
+                popupContent += `<button class="delete-button" onclick="deleteMarkerById('${id}')">Видалити</button>`;
+            }
             marker.bindPopup(popupContent);
             
             marker.addTo(map);
@@ -408,28 +408,30 @@
                     <p><strong>Категорія:</strong> ${marker.category}</p>
                     ${marker.description ? `<p>${marker.description}</p>` : ''}
                 `;
-                // The delete button for individual markers is no longer added, regardless of admin mode
+                if (isAdminMode) {
+                    popupContent += `<button class="delete-button" onclick="deleteMarkerById('${marker.id}')">Видалити</button>`;
+                }
                 marker.setPopupContent(popupContent);
             });
         }
 
-        // The deleteMarkerById function has been removed as individual marker deletion is no longer desired
-        // async function deleteMarkerById(id) { 
-        //     if (!isAdminMode) return; 
+        async function deleteMarkerById(id) { // Made asynchronous
+            if (!isAdminMode) return; // Only allow deletion in admin mode
             
-        //     if (confirm('Ви впевнені, що хочете видалити цю точку?')) {
-        //         const success = await deleteMarkerFromFirestore(id);
-        //         if (success) {
-        //             const markerToDelete = markers.find(m => m.id == id);
-        //             if (markerToDelete) {
-        //                 map.removeLayer(markerToDelete);
-        //                 markers = markers.filter(m => m.id != id);
-        //             }
-        //         } else {
-        //             alert('Помилка при видаленні точки. Спробуйте ще раз.');
-        //         }
-        //     }
-        // }
+            if (confirm('Ви впевнені, що хочете видалити цю точку?')) {
+                // --- Changed: Delete from Firebase ---
+                const success = await deleteMarkerFromFirestore(id);
+                if (success) {
+                    const markerToDelete = markers.find(m => m.id == id);
+                    if (markerToDelete) {
+                        map.removeLayer(markerToDelete);
+                        markers = markers.filter(m => m.id != id);
+                    }
+                } else {
+                    alert('Помилка при видаленні точки. Спробуйте ще раз.');
+                }
+            }
+        }
 
         // --- Admin Functions ---
         function enterAdminMode() {
@@ -443,11 +445,11 @@
 
                 exitAdminBtn.classList.remove('hidden');
                 exportGeoJSONBtn.classList.remove('hidden');
-                // deleteAllBtn.classList.remove('hidden'); // This line is no longer needed
+                deleteAllBtn.classList.remove('hidden');
                 
                 instructions.classList.add('hidden'); // Hide user instructions in admin mode
 
-                // Update popups to *not* show delete button (as it's now permanently removed)
+                // Update popups to show delete button
                 updateAllMarkerPopups();
                 alert('Успішний вхід в адмін-режим!');
             } else {
@@ -465,11 +467,11 @@
 
             exitAdminBtn.classList.add('hidden');
             exportGeoJSONBtn.classList.add('hidden');
-            // deleteAllBtn.classList.add('hidden'); // This line is no longer needed
+            deleteAllBtn.classList.add('hidden');
             
             toggleAddMarkerMode(true); // Re-enable user adding markers
 
-            // Update popups (no change needed as delete button is already removed)
+            // Update popups to hide delete button
             updateAllMarkerPopups();
             alert('Ви вийшли з адмін-режиму.');
         }
@@ -506,28 +508,28 @@
             downloadAnchorNode.remove();
         }
 
-        // The deleteAllMarkers function has been removed as mass deletion is no longer desired
-        // async function deleteAllMarkers() { 
-        //     if (!isAdminMode) return;
-        //     if (confirm('Ви впевнені, що хочете видалити ВСІ точки? Цю дію не можна скасувати!')) {
-        //         const allMarkersSnapshot = await db.collection("markers").get();
-        //         const batch = db.batch(); 
+        async function deleteAllMarkers() { // Made asynchronous
+            if (!isAdminMode) return;
+            if (confirm('Ви впевнені, що хочете видалити ВСІ точки? Цю дію не можна скасувати!')) {
+                // --- Changed: Delete all from Firebase ---
+                const allMarkersSnapshot = await db.collection("markers").get();
+                const batch = db.batch(); // Use batch for efficient deletion of many documents
 
-        //         allMarkersSnapshot.forEach(doc => {
-        //             batch.delete(doc.ref);
-        //         });
+                allMarkersSnapshot.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
 
-        //         try {
-        //             await batch.commit(); 
-        //             markers.forEach(marker => map.removeLayer(marker));
-        //             markers = [];
-        //             alert('Всі точки видалено!');
-        //         } catch (e) {
-        //             console.error("Помилка при видаленні всіх точок: ", e);
-        //             alert('Помилка при видаленні всіх точок. Перевірте консоль розробника.');
-        //         }
-        //     }
-        // }
+                try {
+                    await batch.commit(); // Execute the batch operation
+                    markers.forEach(marker => map.removeLayer(marker));
+                    markers = [];
+                    alert('Всі точки видалено!');
+                } catch (e) {
+                    console.error("Помилка при видаленні всіх точок: ", e);
+                    alert('Помилка при видаленні всіх точок. Перевірте консоль розробника.');
+                }
+            }
+        }
         
         // Load markers from Firebase when the page loads
         loadMarkersFromFirestore();

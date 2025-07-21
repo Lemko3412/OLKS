@@ -14,53 +14,60 @@
             margin: 0;
             padding: 0;
             font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f5f5f7; /* Light grey Apple‑style background */
+            background: #f5f5f7;
             color: #1d1d1f;
-            display: flex; /* Use flexbox for layout */
-            flex-direction: column; /* Stack elements vertically */
-            min-height: 100vh; /* Ensure full viewport height */
         }
         #map {
-            flex-grow: 1; /* Allow map to take available space */
+            height: 100vh;
             width: 100%;
-            min-height: 60vh; /* Minimum height for map on mobile, to make space for controls */
         }
-        
-        /* Control panels (legend, admin) - always positioned */
-        #legend, #admin-panel {
+        #form {
+            position: absolute;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 12px;
-            padding: 16px; /* Slightly smaller padding for controls */
+            padding: 20px;
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            max-width: 250px; /* Slightly smaller max-width */
-            font-size: 14px;
+            max-width: 320px;
             transition: all 0.3s ease;
             z-index: 1000;
-            position: absolute;
         }
         #legend {
+            position: absolute;
             top: 20px;
             right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            max-width: 250px;
+            font-size: 14px;
+            z-index: 1000;
         }
         #admin-panel {
+            position: absolute;
             bottom: 20px;
             right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            max-width: 250px;
+            z-index: 1000;
         }
-
-        /* Utility */
         .hidden { display: none !important; }
-
         #instructions {
             position: absolute;
             top: 20px;
-            left: 60px; /* Shift right so it does not overlap zoom controls */
+            left: 60px;
             background: rgba(0, 0, 0, 0.7);
             color: white;
             padding: 10px 16px;
             border-radius: 8px;
             font-size: 14px;
-            z-index: 1000; /* Keep above map overlays */
+            z-index: 1000;
             transition: all 0.3s ease;
         }
         .legend-item {
@@ -76,8 +83,7 @@
             margin-right: 8px;
             border-radius: 50%;
         }
-        /* Adjusted selectors for input types to be more specific */
-        select, input[type="text"], input[type="password"], textarea { /* ЗМІНЕНО: Додано textarea */
+        select, input[type="text"], input[type="password"] {
             width: 100%;
             padding: 10px;
             margin: 8px 0;
@@ -87,11 +93,9 @@
             background: #fff;
             outline: none;
             transition: border-color 0.2s ease;
-            resize: vertical; /* ЗМІНЕНО: Дозволяє зміну розміру textarea по вертикалі */
-            min-height: 60px; /* ЗМІНЕНО: Мінімальна висота для textarea */
         }
-        select:focus, input[type="text"]:focus, input[type="password"]:focus, textarea:focus { /* ЗМІНЕНО: Додано textarea */
-            border-color: #007aff; /* iOS blue accent */
+        select:focus, input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #007aff;
         }
         button {
             width: 100%;
@@ -120,55 +124,17 @@
             font-size: 16px;
             font-weight: 600;
         }
-
-        /* СТИЛІ ДЛЯ POPUP ФОРМИ */
-        /* По замовчуванню, Leaflet popups мають власні стилі, ми їх доповнимо */
-        .leaflet-popup-content-wrapper {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            color: #1d1d1f;
+        .char-counter {
+            font-size: 12px;
+            color: #6e6e73;
+            margin-top: -6px;
+            margin-bottom: 8px;
+            text-align: right;
         }
-        .leaflet-popup-content {
-            max-width: 280px; /* ЗМІНЕНО: Максимальна ширина форми в попапі */
-        }
-        .leaflet-popup-tip {
-            background: rgba(255, 255, 255, 0.95); /* Колір "хвостика" попапа */
-        }
-
-        /* Медіа-запити для адаптивного дизайну */
         @media (max-width: 768px) {
-            body {
-                flex-direction: column; /* Stack elements vertically on small screens */
-            }
-            #map {
-                min-height: 50vh; /* Adjust map height on smaller screens */
-            }
-            /* Control panels (legend, admin) will stack at the bottom on mobile */
-            #legend, #admin-panel {
-                position: static; /* Remove absolute positioning */
-                margin: 10px auto; /* Center with margin */
-                width: calc(100% - 40px); /* Full width with padding */
-                max-width: 400px; /* Max width to prevent stretching */
-                padding: 15px;
-            }
-            #instructions {
-                position: static; /* Remove absolute positioning */
-                margin: 10px auto;
-                width: calc(100% - 40px);
-                max-width: 400px;
-                text-align: center;
-                border-radius: 8px; /* Ensure rounded corners on static elements */
-            }
-            /* Hide instructions on very small screens if needed, or adjust further */
-            @media (max-width: 480px) {
-                #instructions {
-                    font-size: 12px;
-                    padding: 8px;
-                }
-            }
+            #map { height: 80vh; }
+            #form, #legend, #admin-panel { max-width: 200px; padding: 12px; }
+            #instructions { font-size: 12px; padding: 8px 12px; left: 50px; }
         }
     </style>
 </head>
@@ -177,7 +143,28 @@
     <div id="instructions">Клікніть на мапу, щоб обрати локацію для нової точки.</div>
     <div id="legend">
         <h4>Легенда</h4>
-        <div class="legend-item"><div class="legend-color" style="background: #006400;"></div>Я люблю проводити тут час</div> <div class="legend-item"><div class="legend-color" style="background: #8B0000;"></div>Я уникаю це місце</div> <div class="legend-item"><div class="legend-color" style="background: #008B8B;"></div>Я бачу тут потенціал</div> <div class="legend-item"><div class="legend-color" style="background: #B8860B;"></div>Я пишаюсь цим місцем</div> </div>
+        <div class="legend-item"><div class="legend-color" style="background: #006400;"></div>Я люблю проводити тут час</div>
+        <div class="legend-item"><div class="legend-color" style="background: #8B0000;"></div>Я уникаю це місце</div>
+        <div class="legend-item"><div class="legend-color" style="background: #008B8B;"></div>Я бачу тут потенціал</div>
+        <div class="legend-item"><div class="legend-color" style="background: #B8860B;"></div>Я пишаюсь цим місцем</div>
+    </div>
+
+    <div id="form" class="hidden">
+        <h3>Додати точку</h3>
+        <select id="category">
+            <option value="">Оберіть категорію</option>
+            <option value="love">Я люблю проводити тут час</option>
+            <option value="avoid">Я уникаю це місце</option>
+            <option value="potential">Я бачу тут потенціал</option>
+            <option value="proud">Я пишаюсь цим місцем</option>
+        </select>
+        <input type="text" id="name" placeholder="Назва точки" maxlength="50">
+        <div class="char-counter" id="name-counter">0/50</div>
+        <input type="text" id="description" placeholder="Опис (необов’язково)" maxlength="200">
+        <div class="char-counter" id="description-counter">0/200</div>
+        <button onclick="addMarkerFromForm()">Додати точку</button>
+        <button onclick="cancelMarker()" style="background:#d2d2d7;color:#1d1d1f;">Скасувати</button>
+    </div>
 
     <div id="admin-panel">
         <h3>Адмін-режим</h3>
@@ -189,35 +176,35 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
     <script>
         // Firebase configuration (ВСТАВТЕ СЮДИ ВАШІ РЕАЛЬНІ ДАНІ З FIREBASE CONSOLE!)
         const firebaseConfig = {
-            apiKey: "AIzaSyAO54NkFh3DmWzcMn2LJe93uetyXY3OHJs", 
+            apiKey: "YOUR_API_KEY", 
             authDomain: "olks-79ce8.firebaseapp.com", 
             projectId: "olks-79ce8", 
             storageBucket: "olks-79ce8.firebasestorage.app", 
             messagingSenderId: "968971749709", 
-            appId: "1:968971749709:web:8254a15b889f65bdbc0f04", 
-            // measurementId: "G-KTPEVY0WXM" // measurementId не потрібен для базової роботи Firestore
+            appId: "1:968971749709:web:8254a15b889f65bdbc0f04",
         };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(); // Get a reference to the Firestore database
+        const db = firebase.firestore();
 
-        // Центрування мапи на місто Олександрія, Кіровоградської області (приблизні координати)
-        const map = L.map('map').setView([48.645, 33.119], 13); // Latitude, Longitude, Zoom level
+        const map = L.map('map').setView([48.645, 33.119], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // ЗМІНЕНО: Форма тепер не окремий div, а буде створюватися динамічно в попапі
-        // const form = document.getElementById('form'); // Цей елемент більше не використовується як статичний HTML
-        
+        const form = document.getElementById('form');
+        const categorySelect = document.getElementById('category');
+        const nameInput = document.getElementById('name');
+        const descriptionInput = document.getElementById('description');
+        const nameCounter = document.getElementById('name-counter');
+        const descriptionCounter = document.getElementById('description-counter');
         const instructions = document.getElementById('instructions');
         const adminPanel = document.getElementById('admin-panel');
         const adminPasswordInput = document.getElementById('admin-password');
@@ -226,32 +213,36 @@
         const exportGeoJSONBtn = document.getElementById('export-geojson');
         const deleteAllBtn = document.getElementById('delete-all');
 
-        let tempMarker = null; // Temporary marker for placement
-        let markers = []; // Array to store all L.Marker objects
+        let tempMarker = null;
+        let markers = [];
         let isAddingMarker = false;
         let isAdminMode = false;
-        const ADMIN_PASSWORD = "your_strong_admin_password"; // <--- ЗМІНІТЬ ЦЕ НА СВІЙ СЕКРЕТНИЙ ПАРОЛЬ!
+        const ADMIN_PASSWORD = "your_strong_admin_password";
 
-        // Більш контрастні кольори для маркерів
         const CATEGORY_COLORS = {
-            love: '#006400',    // Dark Green
-            avoid: '#8B0000',   // Dark Red
-            potential: '#008B8B', // Dark Cyan
-            proud: '#B8860B'    // Dark Goldenrod
+            love: '#006400',
+            avoid: '#8B0000',
+            potential: '#008B8B',
+            proud: '#B8860B'
         };
 
-        // Function to create a custom colored icon
         function createCustomIcon(color) {
             return L.divIcon({
                 className: 'custom-div-icon',
                 html: `<div style="background-color: ${color}; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 2px ${color};"></div>`,
                 iconSize: [20, 20],
-                iconAnchor: [10, 10], // Center the icon
-                popupAnchor: [0, -10] // Adjust popup position
+                iconAnchor: [10, 10],
+                popupAnchor: [0, -10]
             });
         }
 
-        // --- Data Handling (Firebase Firestore) ---
+        // Character counter for inputs
+        nameInput.addEventListener('input', () => {
+            nameCounter.textContent = `${nameInput.value.length}/50`;
+        });
+        descriptionInput.addEventListener('input', () => {
+            descriptionCounter.textContent = `${descriptionInput.value.length}/200`;
+        });
 
         async function addMarkerToFirestore(lat, lng, category, name, description) {
             try {
@@ -274,7 +265,6 @@
         async function loadMarkersFromFirestore() {
             markers.forEach(marker => map.removeLayer(marker));
             markers = [];
-
             try {
                 const querySnapshot = await db.collection("markers").get();
                 querySnapshot.forEach(doc => {
@@ -297,42 +287,49 @@
             }
         }
 
-        // --- Map Interaction ---
         map.on('click', function(e) {
             if (isAddingMarker) {
                 if (tempMarker) {
-                    map.removeLayer(tempMarker); // Remove previous temp marker if exists
+                    map.removeLayer(tempMarker);
                 }
-                
-                // ЗМІНЕНО: Створюємо тимчасовий маркер і прив'язуємо до нього форму як popup
-                tempMarker = L.marker(e.latlng).addTo(map);
+                tempMarker = L.marker(e.latlng, { opacity: 0.7, draggable: true }).addTo(map);
+                tempMarker.on('dragend', function(event) {
+                    instructions.textContent = `Обрана локація: ${event.target.getLatLng().lat.toFixed(4)}, ${event.target.getLatLng().lng.toFixed(4)}. Оберіть категорію.`;
+                });
+                instructions.textContent = `Обрана локація: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}. Оберіть категорію.`;
 
-                const formContent = `
-                    <div class="marker-form">
-                        <h3>Додати точку</h3>
-                        <select id="popup-category">
-                            <option value="">Оберіть категорію</option>
-                            <option value="love">Я люблю проводити тут час</option>
-                            <option value="avoid">Я уникаю це місце</option>
-                            <option value="potential">Я бачу тут потенціал</option>
-                            <option value="proud">Я пишаюсь цим місцем</option>
-                        </select>
-                        <input type="text" id="popup-name" placeholder="Назва точки" maxlength="200">
-                        <textarea id="popup-description" placeholder="Опис (необов’язково)" maxlength="200" rows="3"></textarea> <button onclick="addMarkerFromFormPopup()">Додати точку</button>
-                        <button onclick="cancelMarkerPopup()" style="background:#d2d2d7;color:#1d1d1f;">Скасувати</button>
-                    </div>
-                `;
-                tempMarker.bindPopup(formContent, {
-                    closeButton: false, // Не показуємо кнопку закриття попапу
-                    autoClose: false,   // Не закриваємо автоматично
-                    closeOnClick: false // Не закриваємо при кліку на карту
-                }).openPopup();
+                // Position form to the left of the clicked point
+                const point = map.latLngToContainerPoint(e.latlng);
+                const formWidth = form.offsetWidth || 320; // Default width if not rendered yet
+                const formHeight = form.offsetHeight || 300; // Default height
+                let left = point.x - formWidth - 10; // 10px offset from marker
+                let top = point.y;
 
-                instructions.classList.add('hidden'); // Приховуємо інструкції
+                // Ensure form stays within map bounds
+                if (left < 10) left = 10; // Prevent going off left edge
+                if (top < 10) top = 10; // Prevent going off top edge
+                if (top + formHeight > map.getSize().y - 10) {
+                    top = map.getSize().y - formHeight - 10; // Prevent going off bottom
+                }
+
+                // Avoid overlapping with legend and admin panel
+                const legend = document.getElementById('legend');
+                const adminPanel = document.getElementById('admin-panel');
+                const legendRect = legend.getBoundingClientRect();
+                const adminRect = adminPanel.getBoundingClientRect();
+
+                if (left + formWidth > legendRect.left - 10 && top < legendRect.bottom && top + formHeight > legendRect.top) {
+                    left = legendRect.left - formWidth - 10; // Move left of legend
+                }
+                if (left + formWidth > adminRect.left - 10 && top < adminRect.bottom && top + formHeight > adminRect.top) {
+                    left = adminRect.left - formWidth - 10; // Move left of admin panel
+                }
+
+                L.DomUtil.setPosition(form, L.point(left, top));
+                form.classList.remove('hidden');
             }
         });
 
-        // Toggle instruction message when adding a marker
         function toggleAddMarkerMode(enable) {
             isAddingMarker = enable;
             if (enable) {
@@ -340,7 +337,7 @@
                 instructions.textContent = 'Клікніть на мапу, щоб обрати локацію для нової точки.';
             } else {
                 instructions.classList.add('hidden');
-                // ЗМІНЕНО: Ховаємо, якщо був відкритий tempMarker popup
+                form.classList.add('hidden');
                 if (tempMarker) {
                     map.removeLayer(tempMarker);
                     tempMarker = null;
@@ -348,16 +345,15 @@
             }
         }
 
-        toggleAddMarkerMode(true); // Always in adding mode by default for participation
+        toggleAddMarkerMode(true);
 
-        // ЗМІНЕНО: Функції для форми в popup
-        async function addMarkerFromFormPopup() {
-            const category = document.getElementById('popup-category').value;
-            const name = document.getElementById('popup-name').value.trim();
-            const description = document.getElementById('popup-description').value.trim();
+        async function addMarkerFromForm() {
+            const category = categorySelect.value;
+            const name = nameInput.value.trim();
+            const description = descriptionInput.value.trim();
 
             if (!tempMarker) {
-                alert('Помилка: тимчасовий маркер відсутній!');
+                alert('Будь ласка, спочатку оберіть локацію на мапі!');
                 return;
             }
             if (!category) {
@@ -370,7 +366,6 @@
             }
 
             const latlng = tempMarker.getLatLng();
-            
             const newMarkerId = await addMarkerToFirestore(latlng.lat, latlng.lng, category, name, description);
             if (newMarkerId) {
                 addMarkerToMap(latlng.lat, latlng.lng, category, name, description, newMarkerId);
@@ -378,28 +373,37 @@
                 alert('Помилка при додаванні точки. Спробуйте ще раз.');
             }
 
-            // Clear and remove temp marker
-            tempMarker.closePopup();
-            map.removeLayer(tempMarker);
-            tempMarker = null;
-            instructions.classList.remove('hidden'); // Показуємо інструкції знову
-        }
-
-        function cancelMarkerPopup() {
+            form.classList.add('hidden');
+            nameInput.value = '';
+            descriptionInput.value = '';
+            categorySelect.value = '';
+            nameCounter.textContent = '0/50';
+            descriptionCounter.textContent = '0/200';
             if (tempMarker) {
-                tempMarker.closePopup();
                 map.removeLayer(tempMarker);
                 tempMarker = null;
             }
-            instructions.classList.remove('hidden'); // Показуємо інструкції знову
+            instructions.textContent = 'Клікніть на мапу, щоб обрати локацію для нової точки.';
+        }
+
+        function cancelMarker() {
+            form.classList.add('hidden');
+            nameInput.value = '';
+            descriptionInput.value = '';
+            categorySelect.value = '';
+            nameCounter.textContent = '0/50';
+            descriptionCounter.textContent = '0/200';
+            if (tempMarker) {
+                map.removeLayer(tempMarker);
+                tempMarker = null;
+            }
+            instructions.textContent = 'Клікніть на мапу, щоб обрати локацію для нової точки.';
         }
 
         function addMarkerToMap(lat, lng, category, name, description, id) {
             const color = CATEGORY_COLORS && CATEGORY_COLORS.hasOwnProperty(category) ? CATEGORY_COLORS[category] : 'gray';
             const icon = createCustomIcon(color);
-            
             const marker = L.marker([lat, lng], { icon: icon });
-            
             marker.id = id;
             marker.category = category;
             marker.name = name;
@@ -410,15 +414,12 @@
                 <p><strong>Категорія:</strong> ${category}</p>
                 ${description ? `<p>${description}</p>` : ''}
             `;
-            
             if (isAdminMode) {
                 popupContent += `<button class="delete-button" onclick="deleteMarkerById('${id}')">Видалити</button>`;
             }
             marker.bindPopup(popupContent);
-            
             marker.addTo(map);
             markers.push(marker);
-            
             marker.on('popupopen', function() {
                 updateAllMarkerPopups();
             });
@@ -440,7 +441,6 @@
 
         async function deleteMarkerById(id) {
             if (!isAdminMode) return;
-            
             if (confirm('Ви впевнені, що хочете видалити цю точку?')) {
                 const success = await deleteMarkerFromFirestore(id);
                 if (success) {
@@ -455,22 +455,17 @@
             }
         }
 
-        // --- Admin Functions ---
         function enterAdminMode() {
             if (adminPasswordInput.value === ADMIN_PASSWORD) {
                 isAdminMode = true;
-                toggleAddMarkerMode(false); // Disable adding markers on map click when in admin mode
-
+                toggleAddMarkerMode(false);
                 adminPasswordInput.classList.add('hidden');
                 enterAdminBtn.classList.add('hidden');
-
                 exitAdminBtn.classList.remove('hidden');
                 exportGeoJSONBtn.classList.remove('hidden');
                 deleteAllBtn.classList.remove('hidden');
-                
-                instructions.classList.add('hidden'); 
-
-                updateAllMarkerPopups(); // Update popups to show delete button
+                instructions.classList.add('hidden');
+                updateAllMarkerPopups();
                 alert('Успішний вхід в адмін-режим!');
             } else {
                 alert('Невірний пароль!');
@@ -480,17 +475,13 @@
 
         function exitAdminMode() {
             isAdminMode = false;
-
             adminPasswordInput.classList.remove('hidden');
             enterAdminBtn.classList.remove('hidden');
-
             exitAdminBtn.classList.add('hidden');
             exportGeoJSONBtn.classList.add('hidden');
             deleteAllBtn.classList.add('hidden');
-            
-            toggleAddMarkerMode(true); // Re-enable user adding markers
-
-            updateAllMarkerPopups(); // Update popups to hide delete button
+            toggleAddMarkerMode(true);
+            updateAllMarkerPopups();
             alert('Ви вийшли з адмін-режиму.');
         }
 
@@ -531,11 +522,9 @@
             if (confirm('Ви впевнені, що хочете видалити ВСІ точки? Цю дію не можна скасувати!')) {
                 const allMarkersSnapshot = await db.collection("markers").get();
                 const batch = db.batch();
-
                 allMarkersSnapshot.forEach(doc => {
                     batch.delete(doc.ref);
                 });
-
                 try {
                     await batch.commit();
                     markers.forEach(marker => map.removeLayer(marker));
@@ -547,7 +536,7 @@
                 }
             }
         }
-        
+
         loadMarkersFromFirestore();
     </script>
 </body>

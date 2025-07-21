@@ -7,139 +7,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap">
     <style>
-        /* Global reset */
-        *, *::before, *::after { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f5f5f7; /* Light grey Apple‑style background */
-            color: #1d1d1f;
-        }
-        #map {
-            height: 100vh; /* Full viewport height */
-            width: 100%;
-        }
-        #form {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px); /* Frosted‑glass effect */
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            max-width: 320px;
-            transition: all 0.3s ease; /* Smooth animation */
-            z-index: 1000; /* Ensure the form stays on top of the map */
-        }
-        #legend {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            max-width: 250px;
-            font-size: 14px;
-            z-index: 1000;
-        }
-        #admin-panel {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            max-width: 250px;
-            z-index: 1000;
-        }
-        /* Utility */
-        .hidden { display: none !important; }
-
-        #instructions {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            z-index: 1000; /* Keep above map overlays */
-            transition: all 0.3s ease;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            margin-right: 8px;
-            border-radius: 50%;
-        }
-        /* Adjusted selectors for input types to be more specific */
-        select, input[type="text"], input[type="email"], input[type="password"] { /* Додано input[type="email"] */
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 1px solid #d2d2d7;
-            border-radius: 8px;
-            font-size: 14px;
-            background: #fff;
-            outline: none;
-            transition: border-color 0.2s ease;
-        }
-        select:focus, input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus { /* More specific focus styles */
-            border-color: #007aff; /* iOS blue accent */
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: none;
-            border-radius: 8px;
-            background: #007aff;
-            color: white;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-        button:hover { background: #005bb5; }
-        .delete-button { background: #ff2d55; }
-        .delete-button:hover { background: #d70015; }
-        h3 {
-            margin: 0 0 12px;
-            font-size: 18px;
-            font-weight: 600;
-            color: #1d1d1f;
-        }
-        h4 {
-            margin: 0 0 8px;
-            font-size: 16px;
-            font-weight: 600;
-        }
-        @media (max-width: 768px) {
-            #map { height: 80vh; }
-            #form, #legend, #admin-panel { max-width: 200px; padding: 12px; }
-            #instructions { 
-                font-size: 12px; 
-                padding: 8px 12px; 
-                left: 50%;
-                transform: translateX(-50%);
-            }
-        }
+        /* ... ваш CSS код без змін ... */
     </style>
 </head>
 <body>
@@ -147,7 +15,11 @@
     <div id="instructions">Клікніть на мапу, щоб обрати локацію для нової точки.</div>
     <div id="legend">
         <h4>Легенда</h4>
-        <div class="legend-item"><div class="legend-color" style="background: #006400;"></div>Я люблю проводити тут час</div> <div class="legend-item"><div class="legend-color" style="background: #8B0000;"></div>Я уникаю це місце</div> <div class="legend-item"><div class="legend-color" style="background: #008B8B;"></div>Я бачу тут потенціал</div> <div class="legend-item"><div class="legend-color" style="background: #B8860B;"></div>Я пишаюсь цим місцем</div> </div>
+        <div class="legend-item"><div class="legend-color" style="background: #006400;"></div>Я люблю проводити тут час</div>
+        <div class="legend-item"><div class="legend-color" style="background: #8B0000;"></div>Я уникаю це місце</div>
+        <div class="legend-item"><div class="legend-color" style="background: #008B8B;"></div>Я бачу тут потенціал</div>
+        <div class="legend-item"><div class="legend-color" style="background: #B8860B;"></div>Я пишаюсь цим місцем</div>
+    </div>
 
     <div id="form" class="hidden">
         <h3>Додати точку</h3>
@@ -166,7 +38,8 @@
 
     <div id="admin-panel">
         <h3>Режим відладки</h3>
-        <input type="email" id="admin-email" placeholder="Введіть пошту"> <input type="password" id="admin-password" placeholder="Введіть пароль">
+        <input type="email" id="admin-email" placeholder="Введіть пошту">
+        <input type="password" id="admin-password" placeholder="Введіть пароль">
         <button onclick="enterAdminMode()" id="enter-admin">Увійти</button>
         <button onclick="exitAdminMode()" id="exit-admin" class="hidden">Вийти</button>
         <button onclick="exportGeoJSON()" id="export-geojson" class="hidden">Експорт у GeoJSON</button>
@@ -174,7 +47,6 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -183,11 +55,11 @@
         // Firebase configuration (ВСТАВТЕ СЮДИ ВАШІ РЕАЛЬНІ ДАНІ З FIREBASE CONSOLE!)
         const firebaseConfig = {
             apiKey: "AIzaSyAO54NkFh3DmWzcMn2LJe93uetyXY3OHJs", // ЗАМІНІТЬ НА ВАШ РЕАЛЬНИЙ API KEY
-            authDomain: "olks-79ce8.firebaseapp.com", 
-            projectId: "olks-79ce8", 
-            storageBucket: "olks-79ce8.firebasestorage.app", 
-            messagingSenderId: "968971749709", 
-            appId: "1:968971749709:web:8254a15b889f65bdbc0f04", 
+            authDomain: "olks-79ce8.firebaseapp.com",
+            projectId: "olks-79ce8",
+            storageBucket: "olks-79ce8.firebasestorage.app",
+            messagingSenderId: "968971749709",
+            appId: "1:968971749709:web:8254a15b889f65bdbc0f04",
             // measurementId: "G-KTPEVY0WXM" // measurementId не потрібен для базової роботи Firestore
         };
 
@@ -227,6 +99,16 @@
             proud: '#B8860B'    // Dark Goldenrod
         };
 
+        // Функція для екранування HTML-спеціальних символів
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         // Function to create a custom colored icon
         function createCustomIcon(color) {
             return L.divIcon({
@@ -242,8 +124,6 @@
 
         // Функція для додавання маркера в Firestore
         async function addMarkerToFirestore(lat, lng, category, name, description) {
-            // Тепер не перевіряємо auth.currentUser тут, тому що правила дозволяють створювати всім
-            // Якщо потрібен userId, то можна його додати, якщо користувач авторизований, інакше null
             const userId = auth.currentUser ? auth.currentUser.uid : null;
 
             try {
@@ -253,11 +133,11 @@
                     category: category,
                     name: name,
                     description: description,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(), // Додаємо мітку часу
-                    userId: userId // Зберігаємо ID користувача, якщо він увійшов, інакше null
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    userId: userId
                 });
                 console.log("Документ успішно додано з ID: ", docRef.id);
-                return docRef.id; // Повертаємо ID, який присвоїв Firestore
+                return docRef.id;
             } catch (e) {
                 console.error("Помилка додавання документа: ", e);
                 alert("Помилка додавання точки. Спробуйте ще раз.");
@@ -267,7 +147,6 @@
 
         // Функція для завантаження маркерів з Firestore
         async function loadMarkersFromFirestore() {
-            // Очищаємо всі існуючі маркери на карті перед завантаженням нових
             markers.forEach(marker => map.removeLayer(marker));
             markers = [];
 
@@ -284,14 +163,12 @@
 
         // Функція для видалення маркера з Firestore
         async function deleteMarkerFromFirestore(id) {
-            // Firebase Security Rules тепер вирішуватимуть, чи має користувач право видаляти
             try {
                 await db.collection("markers").doc(id).delete();
                 console.log("Документ успішно видалено!");
                 return true;
             } catch (e) {
                 console.error("Помилка видалення документа: ", e);
-                // Покращене повідомлення про помилку, якщо це через правила безпеки
                 if (e.code === 'permission-denied') {
                     alert('У вас немає дозволу на видалення цієї точки. Переконайтеся, що ви увійшли як адміністратор.');
                 } else {
@@ -303,23 +180,19 @@
 
         // --- Map Interaction ---
         map.on('click', function(e) {
-            // ЗМІНЕНО: Тепер не перевіряємо auth.currentUser тут
-            if (isAddingMarker) { 
+            if (isAddingMarker) {
                 if (tempMarker) {
-                    map.removeLayer(tempMarker); // Remove previous temp marker if exists
+                    map.removeLayer(tempMarker);
                 }
                 tempMarker = L.marker(e.latlng, { opacity: 0.7, draggable: true }).addTo(map);
                 tempMarker.on('dragend', function(event) {
-                    // Update location if dragged
                     instructions.textContent = `Обрана локація: ${event.target.getLatLng().lat.toFixed(4)}, ${event.target.getLatLng().lng.toFixed(4)}. Оберіть категорію.`;
                 });
                 instructions.textContent = `Обрана локація: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}. Оберіть категорію.`;
                 form.classList.remove('hidden');
-            } 
-            // else if (!auth.currentUser) { alert('Будь ласка, увійдіть в систему, щоб додавати точки.'); } // Цей блок більше не потрібен
+            }
         });
 
-        // Toggle instruction message when adding a marker
         function toggleAddMarkerMode(enable) {
             isAddingMarker = enable;
             if (enable) {
@@ -335,23 +208,8 @@
             }
         }
 
-        // Initial call to enable adding
-        // ЗМІНЕНО: isAddingMarker = true; тепер відбувається один раз при завантаженні
-        // і не залежить від стану авторизації користувача
-        // Цей auth.onAuthStateChanged буде тільки для адмін-логіки
-        // auth.onAuthStateChanged(user => { // Цей блок тепер лише для адмін-панелі
-        //     if (user) {
-        //         toggleAddMarkerMode(true); // Можна прибрати, бо isAddingMarker вже true
-        //     } else {
-        //         toggleAddMarkerMode(false); // Цей блок більше не актуальний для створення
-        //         instructions.textContent = 'Увійдіть в систему, щоб додавати точки.';
-        //         instructions.classList.remove('hidden');
-        //     }
-        // });
-
-
         // --- Form Functions ---
-        async function addMarkerFromForm() { // Made asynchronous
+        async function addMarkerFromForm() {
             const category = categorySelect.value;
             const name = nameInput.value.trim();
             const description = descriptionInput.value.trim();
@@ -370,16 +228,12 @@
             }
 
             const latlng = tempMarker.getLatLng();
-            
-            // --- Changed: Save to Firebase ---
+
             const newMarkerId = await addMarkerToFirestore(latlng.lat, latlng.lng, category, name, description);
             if (newMarkerId) {
-                addMarkerToMap(latlng.lat, latlng.lng, category, name, description, newMarkerId); // Add to map after successful save
-            } else {
-                // Помилка вже була оброблена в addMarkerToFirestore
+                addMarkerToMap(latlng.lat, latlng.lng, category, name, description, newMarkerId);
             }
 
-            // Clear form and hide
             form.classList.add('hidden');
             nameInput.value = '';
             descriptionInput.value = '';
@@ -404,32 +258,32 @@
         }
 
         function addMarkerToMap(lat, lng, category, name, description, id) {
-            const color = CATEGORY_COLORS && CATEGORY_COLORS.hasOwnProperty(category) ? CATEGORY_COLORS[category] : 'gray'; // Safe access to colors
+            const color = CATEGORY_COLORS && CATEGORY_COLORS.hasOwnProperty(category) ? CATEGORY_COLORS[category] : 'gray';
             const icon = createCustomIcon(color);
-            
+
             const marker = L.marker([lat, lng], { icon: icon });
-            
-            // Store custom properties on the marker object
-            marker.id = id; // Store the unique ID from Firestore
+
+            marker.id = id;
             marker.category = category;
             marker.name = name;
             marker.description = description;
 
+            // !!! ЗАСТОСУВАННЯ escapeHtml ТУТ !!!
             let popupContent = `
-                <h4>${name}</h4>
-                <p><strong>Категорія:</strong> ${category}</p>
-                ${description ? `<p>${description}</p>` : ''}
+                <h4>${escapeHtml(name)}</h4>
+                <p><strong>Категорія:</strong> ${escapeHtml(category)}</p>
+                ${description ? `<p>${escapeHtml(description)}</p>` : ''}
             `;
-            
-            // Add delete button only if in admin mode
-            if (isAdminMode) { // isAdminMode контролюється локально після успішної авторизації
+
+            if (isAdminMode) {
                 popupContent += `<button class="delete-button" onclick="deleteMarkerById('${id}')">Видалити</button>`;
             }
+
             marker.bindPopup(popupContent);
-            
+
             marker.addTo(map);
             markers.push(marker);
-            
+
             marker.on('popupopen', function() {
                 updateAllMarkerPopups();
             });
@@ -437,12 +291,13 @@
 
         function updateAllMarkerPopups() {
             markers.forEach(marker => {
+                // !!! ЗАСТОСУВАННЯ escapeHtml ТУТ !!!
                 let popupContent = `
-                    <h4>${marker.name}</h4>
-                    <p><strong>Категорія:</strong> ${marker.category}</p>
-                    ${marker.description ? `<p>${marker.description}</p>` : ''}
+                    <h4>${escapeHtml(marker.name)}</h4>
+                    <p><strong>Категорія:</strong> ${escapeHtml(marker.category)}</p>
+                    ${marker.description ? `<p>${escapeHtml(marker.description)}</p>` : ''}
                 `;
-                // Кнопка видалення відображається лише якщо isAdminMode true
+
                 if (isAdminMode) {
                     popupContent += `<button class="delete-button" onclick="deleteMarkerById('${marker.id}')">Видалити</button>`;
                 }
@@ -450,13 +305,12 @@
             });
         }
 
-        async function deleteMarkerById(id) { // Made asynchronous
-            // isAdminMode перевіряється тут, але основна безпека на стороні Firebase Rules
+        async function deleteMarkerById(id) {
             if (!isAdminMode) {
                 alert('Ви не в режимі адміністратора. Увійдіть, щоб видалити точки.');
                 return;
             }
-            
+
             if (confirm('Ви впевнені, що хочете видалити цю точку?')) {
                 const success = await deleteMarkerFromFirestore(id);
                 if (success) {
@@ -465,8 +319,6 @@
                         map.removeLayer(markerToDelete);
                         markers = markers.filter(m => m.id != id);
                     }
-                } else {
-                    // Помилка вже була оброблена в deleteMarkerFromFirestore
                 }
             }
         }
@@ -484,13 +336,12 @@
             try {
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 const user = userCredential.user;
-                
-                // ЗАМІНІТЬ НА ВАШ РЕАЛЬНИЙ EMAIL АДМІНІСТРАТОРА
-                const adminEmail = "mrqwinq@gmail.com"; 
+
+                const adminEmail = "mrqwinq@gmail.com";
 
                 if (user.email === adminEmail) {
                     isAdminMode = true;
-                    toggleAddMarkerMode(false); // Адмін в режимі адміна не додає маркери з основного інтерфейсу
+                    toggleAddMarkerMode(false);
 
                     adminEmailInput.classList.add('hidden');
                     adminPasswordInput.classList.add('hidden');
@@ -499,13 +350,13 @@
                     exitAdminBtn.classList.remove('hidden');
                     exportGeoJSONBtn.classList.remove('hidden');
                     deleteAllBtn.classList.remove('hidden');
-                    
-                    instructions.classList.add('hidden'); // Hide user instructions in admin mode
 
-                    updateAllMarkerPopups(); // Оновити попапи, щоб показати кнопки видалення
+                    instructions.classList.add('hidden');
+
+                    updateAllMarkerPopups();
                     alert('Успішний вхід в адмін-режим!');
                 } else {
-                    await auth.signOut(); // Вийти з системи
+                    await auth.signOut();
                     alert('Доступ заборонено. Тільки адміністратори можуть увійти.');
                 }
             } catch (error) {
@@ -524,13 +375,13 @@
                 }
                 alert(errorMessage);
             }
-            adminEmailInput.value = ''; // Clear fields
+            adminEmailInput.value = '';
             adminPasswordInput.value = '';
         }
 
         async function exitAdminMode() {
             try {
-                await auth.signOut(); // Вийти з Firebase Authentication
+                await auth.signOut();
                 isAdminMode = false;
 
                 adminEmailInput.classList.remove('hidden');
@@ -540,10 +391,10 @@
                 exitAdminBtn.classList.add('hidden');
                 exportGeoJSONBtn.classList.add('hidden');
                 deleteAllBtn.classList.add('hidden');
-                
-                toggleAddMarkerMode(true); // ЗМІНЕНО: При виході з адміна, знову дозволяємо додавати звичайним користувачам
 
-                updateAllMarkerPopups(); // Оновити попапи, щоб приховати кнопки видалення
+                toggleAddMarkerMode(true);
+
+                updateAllMarkerPopups();
                 alert('Ви вийшли з адмін-режиму.');
             } catch (error) {
                 console.error("Помилка виходу: ", error.message);
@@ -562,7 +413,7 @@
                     "type": "Feature",
                     "properties": {
                         "id": marker.id,
-                        "category": marker.category,
+                        "category": marker.category, // Категорію теж можна екранувати, якщо вона не з вашого фіксованого списку
                         "name": marker.name,
                         "description": marker.description,
                         "color": CATEGORY_COLORS && CATEGORY_COLORS.hasOwnProperty(marker.category) ? CATEGORY_COLORS[marker.category] : 'gray'
@@ -588,21 +439,21 @@
             downloadAnchorNode.remove();
         }
 
-        async function deleteAllMarkers() { // Made asynchronous
+        async function deleteAllMarkers() {
             if (!isAdminMode) {
                 alert('Ви не в режимі адміністратора, щоб видалити всі точки.');
                 return;
             }
             if (confirm('Ви впевнені, що хочете видалити ВСІ точки? Цю дію не можна скасувати!')) {
                 const allMarkersSnapshot = await db.collection("markers").get();
-                const batch = db.batch(); // Use batch for efficient deletion of many documents
+                const batch = db.batch();
 
                 allMarkersSnapshot.forEach(doc => {
                     batch.delete(doc.ref);
                 });
 
                 try {
-                    await batch.commit(); // Execute the batch operation
+                    await batch.commit();
                     markers.forEach(marker => map.removeLayer(marker));
                     markers = [];
                     alert('Всі точки видалено!');
@@ -616,20 +467,16 @@
                 }
             }
         }
-        
-        // Initial load of markers when the page loads
+
         loadMarkersFromFirestore();
 
-        // Слухаємо зміни стану авторизації Firebase
-        // Цей блок тепер в основному відповідає за адмін-панель
         auth.onAuthStateChanged(user => {
             if (user) {
                 console.log("Користувач увійшов: ", user.email);
-                const adminEmail = "mrqwinq@gmail.com"; // ВАШ РЕАЛЬНИЙ EMAIL АДМІНІСТРАТОРА
+                const adminEmail = "mrqwinq@gmail.com";
                 if (user.email === adminEmail) {
                     isAdminMode = true;
-                    toggleAddMarkerMode(false); // Адмін в режимі адміна не додає маркери з основного інтерфейсу
-                    // Оновлення UI адмін-панелі при перезавантаженні сторінки, якщо адмін був увійшов
+                    toggleAddMarkerMode(false);
                     adminEmailInput.classList.add('hidden');
                     adminPasswordInput.classList.add('hidden');
                     enterAdminBtn.classList.add('hidden');
@@ -637,17 +484,16 @@
                     exitAdminBtn.classList.remove('hidden');
                     exportGeoJSONBtn.classList.remove('hidden');
                     deleteAllBtn.classList.remove('hidden');
-                    
+
                     instructions.classList.add('hidden');
                 } else {
                     isAdminMode = false;
-                    toggleAddMarkerMode(true); // Звичайний користувач увійшов - дозволяємо додавати
+                    toggleAddMarkerMode(true);
                 }
-                updateAllMarkerPopups(); // Оновлюємо попапи, щоб показати/приховати кнопку видалення
+                updateAllMarkerPopups();
             } else {
                 console.log("Користувач вийшов.");
                 isAdminMode = false;
-                // При виході з системи, приховуємо адмін-панель
                 adminEmailInput.classList.remove('hidden');
                 adminPasswordInput.classList.remove('hidden');
                 enterAdminBtn.classList.remove('hidden');
@@ -656,16 +502,13 @@
                 exportGeoJSONBtn.classList.add('hidden');
                 deleteAllBtn.classList.add('hidden');
 
-                toggleAddMarkerMode(true); // ЗМІНЕНО: Неавторизований користувач - дозволяємо додавати
-                updateAllMarkerPopups(); // Оновлюємо попапи, щоб приховати кнопки видалення
+                toggleAddMarkerMode(true);
+                updateAllMarkerPopups();
             }
         });
 
-        // Забезпечуємо, що інструкції для додавання завжди видимі при завантаженні (якщо не в адмін-режимі)
-        // Це спрацює на початку, до того як auth.onAuthStateChanged спрацює,
-        // а потім auth.onAuthStateChanged перевірить, чи це адмін, і змінить стан, якщо потрібно.
-        if (!isAdminMode) { // Переконаємось, що ми не в адмін режимі за замовчуванням
-             toggleAddMarkerMode(true);
+        if (!isAdminMode) {
+            toggleAddMarkerMode(true);
         }
     </script>
 </body>

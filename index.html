@@ -139,6 +139,11 @@
                 transform: translateY(0); /* Показати панель */
             }
 
+            /* Це важливо: додаємо правило, щоб форма залишалася видимою, коли поле вводу у фокусі */
+            #form.visible.focused-input {
+                transform: translateY(0) !important; /* Примусово залишаємо її видимої */
+            }
+
             /* Інструкції */
             #instructions {
                 position: fixed;
@@ -154,7 +159,9 @@
             }
 
             /* Приховуємо інші панелі, коли одна активна */
-            #form:not(.visible), #legend:not(.visible), #admin-panel:not(.visible) {
+            #form:not(.visible),
+            #legend:not(.visible),
+            #admin-panel:not(.visible) {
                 display: none;
             }
         }
@@ -747,6 +754,41 @@
                 tempMarker = null;
             }
         });
+
+        // --- НОВІ ОБРОБНИКИ ДЛЯ ПОЛІВ ВВЕДЕННЯ ---
+        nameInput.addEventListener('focus', () => {
+            if (window.innerWidth <= 768) {
+                form.classList.add('focused-input'); // Додаємо клас, щоб запобігти приховуванню на мобільних
+            }
+        });
+        nameInput.addEventListener('blur', () => {
+            if (window.innerWidth <= 768) {
+                form.classList.remove('focused-input'); // Видаляємо клас
+            }
+        });
+
+        descriptionInput.addEventListener('focus', () => {
+            if (window.innerWidth <= 768) {
+                form.classList.add('focused-input');
+            }
+        });
+        descriptionInput.addEventListener('blur', () => {
+            if (window.innerWidth <= 768) {
+                form.classList.remove('focused-input');
+            }
+        });
+
+        categorySelect.addEventListener('focus', () => {
+            if (window.innerWidth <= 768) {
+                form.classList.add('focused-input');
+            }
+        });
+        categorySelect.addEventListener('blur', () => {
+            if (window.innerWidth <= 768) {
+                form.classList.remove('focused-input');
+            }
+        });
+        // --- КІНЕЦЬ НОВИХ ОБРОБНИКІВ ---
 
         loadMarkersFromFirestore();
 

@@ -7,7 +7,214 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap">
     <style>
-        /* ... ваш CSS код без змін ... */
+        /* CSS, який я додав/виправив, є тут */
+        html, body {
+            height: 100%; /* Дуже важливо для відображення мапи */
+            margin: 0;
+            padding: 0;
+            font-family: 'SF Pro Display', sans-serif; /* Ваш шрифт */
+            color: #1d1d1f;
+            background-color: #f2f2f7;
+        }
+
+        #map {
+            height: 100vh; /* Мапа займає всю висоту вікна */
+            width: 100%;
+            position: absolute; /* Дозволяє елементам інтерфейсу накладатися */
+            top: 0;
+            left: 0;
+            z-index: 1; /* Мапа на задньому плані */
+        }
+
+        /* Стилі для елементів інтерфейсу */
+        #instructions, #form, #legend, #admin-panel {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000; /* Розміщуємо поверх мапи */
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #instructions {
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        #form {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 300px;
+            max-width: 90%;
+        }
+
+        #form h3 {
+            margin-top: 0;
+            color: #1d1d1f;
+        }
+
+        #form input[type="text"],
+        #form select {
+            padding: 10px;
+            border: 1px solid #d2d2d7;
+            border-radius: 5px;
+            font-size: 1em;
+            background-color: #fff;
+            color: #1d1d1f;
+        }
+
+        #form button {
+            padding: 10px 15px;
+            background-color: #007aff; /* Apple Blue */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease;
+        }
+
+        #form button:hover {
+            background-color: #005bb5;
+        }
+
+        #form button:active {
+            background-color: #003e7e;
+        }
+
+        #legend {
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+        }
+
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+            margin-right: 8px;
+        }
+
+        #admin-panel {
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 280px;
+            max-width: 90%;
+        }
+
+        #admin-panel h3 {
+            margin-top: 0;
+            color: #1d1d1f;
+        }
+
+        #admin-panel input {
+            padding: 10px;
+            border: 1px solid #d2d2d7;
+            border-radius: 5px;
+            font-size: 1em;
+            background-color: #fff;
+            color: #1d1d1f;
+        }
+
+        #admin-panel button {
+            padding: 10px 15px;
+            background-color: #007aff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease;
+        }
+
+        #admin-panel button:hover {
+            background-color: #005bb5;
+        }
+
+        #admin-panel button:active {
+            background-color: #003e7e;
+        }
+
+        .delete-button {
+            background-color: #ff3b30 !important; /* Apple Red */
+        }
+
+        .delete-button:hover {
+            background-color: #c7000b !important;
+        }
+
+        .delete-button:active {
+            background-color: #a30009 !important;
+        }
+
+        /* Стилі для іконок маркерів */
+        .custom-div-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Стилі для попапів Leaflet */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-family: 'SF Pro Display', sans-serif;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .leaflet-popup-content-wrapper .leaflet-popup-content {
+            margin: 0;
+            padding: 0;
+        }
+
+        .leaflet-popup-content h4 {
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-size: 1.2em;
+            color: #1d1d1f;
+        }
+
+        .leaflet-popup-content p {
+            margin-bottom: 5px;
+        }
+
+        .leaflet-popup-tip {
+            background: #fff; /* Колір "хвостика" попапа */
+        }
+
+        /* Клас, що приховує елемент */
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -413,7 +620,7 @@
                     "type": "Feature",
                     "properties": {
                         "id": marker.id,
-                        "category": marker.category, // Категорію теж можна екранувати, якщо вона не з вашого фіксованого списку
+                        "category": marker.category,
                         "name": marker.name,
                         "description": marker.description,
                         "color": CATEGORY_COLORS && CATEGORY_COLORS.hasOwnProperty(marker.category) ? CATEGORY_COLORS[marker.category] : 'gray'
@@ -470,13 +677,15 @@
 
         loadMarkersFromFirestore();
 
+        // Цей блок перевіряє стан автентифікації при завантаженні сторінки
         auth.onAuthStateChanged(user => {
             if (user) {
                 console.log("Користувач увійшов: ", user.email);
                 const adminEmail = "mrqwinq@gmail.com";
                 if (user.email === adminEmail) {
                     isAdminMode = true;
-                    toggleAddMarkerMode(false);
+                    toggleAddMarkerMode(false); // Вимикаємо режим додавання для адміна
+                    
                     adminEmailInput.classList.add('hidden');
                     adminPasswordInput.classList.add('hidden');
                     enterAdminBtn.classList.add('hidden');
@@ -485,15 +694,16 @@
                     exportGeoJSONBtn.classList.remove('hidden');
                     deleteAllBtn.classList.remove('hidden');
 
-                    instructions.classList.add('hidden');
+                    instructions.classList.add('hidden'); // Приховуємо інструкції додавання для адміна
                 } else {
                     isAdminMode = false;
-                    toggleAddMarkerMode(true);
+                    toggleAddMarkerMode(true); // Вмикаємо режим додавання для звичайного користувача
                 }
-                updateAllMarkerPopups();
+                updateAllMarkerPopups(); // Оновлюємо попапи для відображення/приховування кнопок видалення
             } else {
                 console.log("Користувач вийшов.");
                 isAdminMode = false;
+                
                 adminEmailInput.classList.remove('hidden');
                 adminPasswordInput.classList.remove('hidden');
                 enterAdminBtn.classList.remove('hidden');
@@ -502,11 +712,13 @@
                 exportGeoJSONBtn.classList.add('hidden');
                 deleteAllBtn.classList.add('hidden');
 
-                toggleAddMarkerMode(true);
-                updateAllMarkerPopups();
+                toggleAddMarkerMode(true); // Завжди вмикаємо режим додавання для неавторизованих
+                updateAllMarkerPopups(); // Оновлюємо попапи (приховаємо кнопки видалення)
             }
         });
 
+        // Забезпечуємо, що режим додавання увімкнений, якщо ми не в адмін-режимі на старті
+        // Цей рядок може бути надлишковим завдяки onAuthStateChanged, але не зашкодить.
         if (!isAdminMode) {
             toggleAddMarkerMode(true);
         }

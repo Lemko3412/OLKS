@@ -99,7 +99,7 @@
             margin: 8px 0;
             border: 1px solid #d2d2d7;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 14px; /* Базовий розмір для інших елементів */
             background: #fff;
             outline: none;
             transition: border-color 0.2s ease;
@@ -143,6 +143,13 @@
                 left: 50%;
                 transform: translateX(-50%);
             }
+        }
+
+        /* ОНОВЛЕНО: Стиль для елемента select, щоб компенсувати масштабування шрифту */
+        select {
+            font-size: 10px; /* Експериментуйте з цим значенням (наприклад, 12px, 9px), щоб знайти оптимальний розмір */
+            /* Якщо потрібно, можете також змінити padding для цього конкретного елемента */
+            /* padding: 8px 10px; */ 
         }
     </style>
 </head>
@@ -659,7 +666,7 @@
             toggleAddMarkerMode(true);
         }
 
-        // --- JavaScript для корекції масштабування в iframe (ОНОВЛЕНО) ---
+        // --- JavaScript для корекції масштабування в iframe та приховування адмін-панелі (ОНОВЛЕНО) ---
         function adjustForIframeScaling() {
             if (window.self !== window.top) { // Перевіряємо, чи ми в iframe
                 const readymagScaleFactor = 1.5; // Ми знаємо, що Readymag масштабує на 150%
@@ -671,12 +678,25 @@
                     body.style.transform = `scale(${desiredScaleFactor})`;
                     body.style.transformOrigin = 'top left'; 
                     body.style.width = `${100 / desiredScaleFactor}%`;
-                    // РЯДОК body.style.height = ...; БІЛЬШЕ НЕ ПОТРІБЕН, ВІН СТВОРЮВАВ ПРОКРУТКУ
                     body.style.overflow = 'visible'; 
                 }
 
                 if (map) {
                     map.invalidateSize();
+                }
+
+                // НОВЕ: Приховуємо адмін-панель, якщо ми в iframe
+                if (adminPanel) {
+                    adminPanel.classList.add('hidden');
+                }
+                // Приховайте також інструкції та форму додавання, якщо це потрібно для чистоти інтерфейсу в embed
+                instructions.classList.add('hidden');
+                form.classList.add('hidden');
+                isAddingMarker = false; // Вимикаємо можливість додавання маркерів через клік у embed версії
+            } else {
+                // Якщо ми не в iframe (тобто, на повній версії сайту), переконайтеся, що адмін-панель ВИДИМА
+                if (adminPanel) {
+                    adminPanel.classList.remove('hidden');
                 }
             }
         }

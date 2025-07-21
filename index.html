@@ -87,7 +87,7 @@
         }
         select, input[type="text"], input[type="password"] {
             width: 100%;
-            padding: 10px;
+            padding: 10px 70px 10px 10px; /* Adjusted padding for counter */
             margin: 8px 0;
             border: 1px solid #d2d2d7;
             border-radius: 8px;
@@ -95,9 +95,27 @@
             background: #fff;
             outline: none;
             transition: border-color 0.2s ease;
+            position: relative;
         }
         select:focus, input[type="text"]:focus, input[type="password"]:focus {
             border-color: #007aff;
+        }
+        /* Character counter inside input fields */
+        #name, #description {
+            position: relative;
+        }
+        #name::after, #description::after {
+            content: attr(data-counter);
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #6e6e73;
+            display: none;
+        }
+        #name:not(:placeholder-shown)::after, #description:not(:placeholder-shown)::after {
+            display: block;
         }
         button {
             width: 100%;
@@ -126,17 +144,30 @@
             font-size: 16px;
             font-weight: 600;
         }
-        .char-counter {
-            font-size: 12px;
-            color: #6e6e73;
-            margin-top: -6px;
-            margin-bottom: 8px;
-            text-align: right;
+        /* Popup styling to prevent text overflow */
+        .leaflet-popup-content {
+            max-width: 250px;
+            word-wrap: break-word;
+            white-space: pre-wrap; /* Preserve line breaks */
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .leaflet-popup-content h4 {
+            margin: 0 0 8px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .leaflet-popup-content p {
+            margin: 0 0 8px;
+        }
+        .leaflet-popup-content button {
+            margin-top: 8px;
         }
         @media (max-width: 768px) {
             #map { height: 80vh; }
             #form, #legend, #admin-panel { max-width: 200px; padding: 12px; }
             #instructions { font-size: 12px; padding: 8px 12px; left: 50px; }
+            .leaflet-popup-content { max-width: 180px; }
         }
     </style>
 </head>
@@ -160,10 +191,8 @@
             <option value="potential">Я бачу тут потенціал</option>
             <option value="proud">Я пишаюсь цим місцем</option>
         </select>
-        <input type="text" id="name" placeholder="Назва точки" maxlength="50">
-        <div class="char-counter" id="name-counter">0/50</div>
-        <input type="text" id="description" placeholder="Опис (необов’язково)" maxlength="200">
-        <div class="char-counter" id="description-counter">0/200</div>
+        <input type="text" id="name" placeholder="Назва точки" maxlength="50" data-counter="0/50">
+        <input type="text" id="description" placeholder="Опис (необов’язково)" maxlength="200" data-counter="0/200">
         <button onclick="addMarkerFromForm()">Додати точку</button>
         <button onclick="cancelMarker()" style="background:#d2d2d7;color:#1d1d1f;">Скасувати</button>
     </div>
@@ -205,8 +234,6 @@
         const categorySelect = document.getElementById('category');
         const nameInput = document.getElementById('name');
         const descriptionInput = document.getElementById('description');
-        const nameCounter = document.getElementById('name-counter');
-        const descriptionCounter = document.getElementById('description-counter');
         const instructions = document.getElementById('instructions');
         const adminPanel = document.getElementById('admin-panel');
         const adminPasswordInput = document.getElementById('admin-password');
@@ -240,10 +267,10 @@
 
         // Character counter for inputs
         nameInput.addEventListener('input', () => {
-            nameCounter.textContent = `${nameInput.value.length}/50`;
+            nameInput.setAttribute('data-counter', `${nameInput.value.length}/50`);
         });
         descriptionInput.addEventListener('input', () => {
-            descriptionCounter.textContent = `${descriptionInput.value.length}/200`;
+            descriptionInput.setAttribute('data-counter', `${descriptionInput.value.length}/200`);
         });
 
         async function addMarkerToFirestore(lat, lng, category, name, description) {
@@ -307,7 +334,7 @@
             isAddingMarker = enable;
             if (enable) {
                 instructions.classList.remove('hidden');
-                instructions.textContent = 'Клікніть на мапу, щоб обрати локацію для нової точки.';
+                instructions.textContent = 'Клікніть на мапу, щоб обрати локацію для новtant точки.';
             } else {
                 instructions.classList.add('hidden');
                 form.classList.add('hidden');
@@ -350,8 +377,8 @@
             nameInput.value = '';
             descriptionInput.value = '';
             categorySelect.value = '';
-            nameCounter.textContent = '0/50';
-            descriptionCounter.textContent = '0/200';
+            nameInput.setAttribute('data-counter', '0/50');
+            descriptionInput.setAttribute('data-counter', '0/200');
             if (tempMarker) {
                 map.removeLayer(tempMarker);
                 tempMarker = null;
@@ -364,8 +391,8 @@
             nameInput.value = '';
             descriptionInput.value = '';
             categorySelect.value = '';
-            nameCounter.textContent = '0/50';
-            descriptionCounter.textContent = '0/200';
+            nameInput.setAttribute('data-counter', '0/50');
+            descriptionInput.setAttribute('data-counter', '0/200');
             if (tempMarker) {
                 map.removeLayer(tempMarker);
                 tempMarker = null;

@@ -87,6 +87,7 @@
             margin-right: 8px;
             border-radius: 50%;
         }
+        /* Adjusted selectors for input types to be more specific */
         select, input[type="text"], input[type="password"] {
             width: 100%;
             padding: 10px;
@@ -98,7 +99,7 @@
             outline: none;
             transition: border-color 0.2s ease;
         }
-        select:focus, input:focus {
+        select:focus, input[type="text"]:focus, input[type="password"]:focus { /* More specific focus styles */
             border-color: #007aff; /* iOS blue accent */
         }
         button {
@@ -140,11 +141,7 @@
     <div id="instructions">Клікніть на мапу, щоб обрати локацію для нової точки.</div>
     <div id="legend">
         <h4>Легенда</h4>
-        <div class="legend-item"><div class="legend-color" style="background: green;"></div>Я люблю проводити тут час</div>
-        <div class="legend-item"><div class="legend-color" style="background: red;"></div>Я уникаю це місце</div>
-        <div class="legend-item"><div class="legend-color" style="background: cyan;"></div>Я бачу тут потенціал</div>
-        <div class="legend-item"><div class="legend-color" style="background: yellow;"></div>Я пишаюсь цим місцем</div>
-    </div>
+        <div class="legend-item"><div class="legend-color" style="background: #006400;"></div>Я люблю проводити тут час</div> <div class="legend-item"><div class="legend-color" style="background: #8B0000;"></div>Я уникаю це місце</div> <div class="legend-item"><div class="legend-color" style="background: #008B8B;"></div>Я бачу тут потенціал</div> <div class="legend-item"><div class="legend-color" style="background: #B8860B;"></div>Я пишаюсь цим місцем</div> </div>
 
     <div id="form" class="hidden">
         <h3>Додати точку</h3>
@@ -176,22 +173,23 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
     <script>
-        // Firebase configuration (вставте сюди ваші дані з Firebase Console)
+        // Firebase configuration (ВСТАВТЕ СЮДИ ВАШІ РЕАЛЬНІ ДАНІ З FIREBASE CONSOLE!)
         const firebaseConfig = {
-            apiKey: "AIzaSyAO54NkFh3DmWzcMn2LJe93uetyXY3OHJs",
-            authDomain: "olks-79ce8.firebaseapp.com",
-            projectId: "olks-79ce8",
-            storageBucket: "olks-79ce8.firebasestorage.app",
-            messagingSenderId: "968971749709",
-            appId: "1:968971749709:web:8254a15b889f65bdbc0f04",
+            apiKey: "YOUR_API_KEY", 
+            authDomain: "olks-79ce8.firebaseapp.com", 
+            projectId: "olks-79ce8", 
+            storageBucket: "olks-79ce8.firebasestorage.app", 
+            messagingSenderId: "968971749709", 
+            appId: "1:968971749709:web:8254a15b889f65bdbc0f04", 
             // measurementId: "G-KTPEVY0WXM" // measurementId не потрібен для базової роботи Firestore
         };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(); // Отримуємо посилання на базу даних Firestore
+        const db = firebase.firestore(); // Get a reference to the Firestore database
 
-        const map = L.map('map').setView([50.4501, 30.5234], 13); // Центр Києва
+        // ЗМІНЕНО: Центрування мапи на місто Олександрія, Кіровоградської області (приблизні координати)
+        const map = L.map('map').setView([48.645, 33.119], 13); // Latitude, Longitude, Zoom level
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
@@ -212,14 +210,14 @@
         let markers = []; // Array to store all L.Marker objects
         let isAddingMarker = false;
         let isAdminMode = false;
-        const ADMIN_PASSWORD = "your_strong_admin_password"; // <--- Змініть це на СВІЙ СЕКРЕТНИЙ ПАРОЛЬ!
+        const ADMIN_PASSWORD = "your_strong_admin_password"; // <--- ЗМІНІТЬ ЦЕ НА СВІЙ СЕКРЕТНИЙ ПАРОЛЬ!
 
-        // Marker colors based on category
+        // ЗМІНЕНО: Більш контрастні кольори для маркерів
         const CATEGORY_COLORS = {
-            love: 'green',
-            avoid: 'red',
-            potential: 'cyan',
-            proud: 'yellow'
+            love: '#006400',    // Dark Green
+            avoid: '#8B0000',   // Dark Red
+            potential: '#008B8B', // Dark Cyan
+            proud: '#B8860B'    // Dark Goldenrod
         };
 
         // Function to create a custom colored icon
@@ -319,7 +317,7 @@
         toggleAddMarkerMode(true); // Always in adding mode by default for participation
 
         // --- Form Functions ---
-        async function addMarkerFromForm() { // Зроблено асинхронною
+        async function addMarkerFromForm() { // Made asynchronous
             const category = categorySelect.value;
             const name = nameInput.value.trim();
             const description = descriptionInput.value.trim();
@@ -339,10 +337,10 @@
 
             const latlng = tempMarker.getLatLng();
             
-            // --- Змінено: Збереження в Firebase ---
+            // --- Changed: Save to Firebase ---
             const newMarkerId = await addMarkerToFirestore(latlng.lat, latlng.lng, category, name, description);
             if (newMarkerId) {
-                addMarkerToMap(latlng.lat, latlng.lng, category, name, description, newMarkerId); // Додаємо на карту після успішного збереження
+                addMarkerToMap(latlng.lat, latlng.lng, category, name, description, newMarkerId); // Add to map after successful save
             } else {
                 alert('Помилка при додаванні точки. Спробуйте ще раз.');
             }
@@ -372,7 +370,7 @@
         }
 
         function addMarkerToMap(lat, lng, category, name, description, id) {
-            const color = CATEGORY_COLORS[category] || 'gray';
+            const color = CATEGORY_COLORS && CATEGORY_COLORS.hasOwnProperty(category) ? CATEGORY_COLORS[category] : 'gray'; // Safe access to colors
             const icon = createCustomIcon(color);
             
             const marker = L.marker([lat, lng], { icon: icon });
@@ -398,7 +396,6 @@
             marker.addTo(map);
             markers.push(marker);
             
-            // Re-bind popups for all markers if admin mode changes (on popupopen)
             marker.on('popupopen', function() {
                 updateAllMarkerPopups();
             });
@@ -418,11 +415,11 @@
             });
         }
 
-        async function deleteMarkerById(id) { // Зроблено асинхронною
+        async function deleteMarkerById(id) { // Made asynchronous
             if (!isAdminMode) return; // Only allow deletion in admin mode
             
             if (confirm('Ви впевнені, що хочете видалити цю точку?')) {
-                // --- Змінено: Видалення з Firebase ---
+                // --- Changed: Delete from Firebase ---
                 const success = await deleteMarkerFromFirestore(id);
                 if (success) {
                     const markerToDelete = markers.find(m => m.id == id);
@@ -440,12 +437,17 @@
         function enterAdminMode() {
             if (adminPasswordInput.value === ADMIN_PASSWORD) {
                 isAdminMode = true;
-                toggleAddMarkerMode(false); // Disable user adding when in admin
-                adminPanel.classList.add('hidden'); // Hide password input
+                toggleAddMarkerMode(false);
+
+                // ЗМІНЕНО: Правильне керування видимістю елементів адмін-панелі
+                adminPasswordInput.classList.add('hidden');
+                enterAdminBtn.classList.add('hidden');
+
                 exitAdminBtn.classList.remove('hidden');
                 exportGeoJSONBtn.classList.remove('hidden');
                 deleteAllBtn.classList.remove('hidden');
-                instructions.classList.add('hidden'); // Hide instructions in admin mode
+                
+                instructions.classList.add('hidden'); // Hide user instructions in admin mode
 
                 // Update popups to show delete button
                 updateAllMarkerPopups();
@@ -458,13 +460,17 @@
 
         function exitAdminMode() {
             isAdminMode = false;
-            adminPanel.classList.remove('hidden');
+
+            // ЗМІНЕНО: Правильне керування видимістю елементів адмін-панелі
+            adminPasswordInput.classList.remove('hidden');
+            enterAdminBtn.classList.remove('hidden');
+
             exitAdminBtn.classList.add('hidden');
             exportGeoJSONBtn.classList.add('hidden');
             deleteAllBtn.classList.add('hidden');
-            enterAdminBtn.classList.remove('hidden'); // Show enter admin button again
-            toggleAddMarkerMode(true); // Re-enable user adding
             
+            toggleAddMarkerMode(true); // Re-enable user adding markers
+
             // Update popups to hide delete button
             updateAllMarkerPopups();
             alert('Ви вийшли з адмін-режиму.');
@@ -479,7 +485,7 @@
                         "category": marker.category,
                         "name": marker.name,
                         "description": marker.description,
-                        "color": CATEGORY_COLORS[marker.category] // Add color for reference
+                        "color": CATEGORY_COLORS && CATEGORY_COLORS.hasOwnProperty(marker.category) ? CATEGORY_COLORS[marker.category] : 'gray' // Safe access to colors
                     },
                     "geometry": {
                         "type": "Point",
@@ -502,19 +508,19 @@
             downloadAnchorNode.remove();
         }
 
-        async function deleteAllMarkers() { // Зроблено асинхронною
+        async function deleteAllMarkers() { // Made asynchronous
             if (!isAdminMode) return;
             if (confirm('Ви впевнені, що хочете видалити ВСІ точки? Цю дію не можна скасувати!')) {
-                // --- Змінено: Видалення всіх з Firebase ---
+                // --- Changed: Delete all from Firebase ---
                 const allMarkersSnapshot = await db.collection("markers").get();
-                const batch = db.batch(); // Використовуємо batch для ефективного видалення багатьох документів
+                const batch = db.batch(); // Use batch for efficient deletion of many documents
 
                 allMarkersSnapshot.forEach(doc => {
                     batch.delete(doc.ref);
                 });
 
                 try {
-                    await batch.commit(); // Виконуємо пакетну операцію
+                    await batch.commit(); // Execute the batch operation
                     markers.forEach(marker => map.removeLayer(marker));
                     markers = [];
                     alert('Всі точки видалено!');
@@ -525,7 +531,7 @@
             }
         }
         
-        // Завантажуємо маркери з Firebase при завантаженні сторінки
+        // Load markers from Firebase when the page loads
         loadMarkersFromFirestore();
     </script>
 </body>

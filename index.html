@@ -19,11 +19,14 @@
             display: flex; /* Використовуємо flexbox для основного лейауту */
             flex-direction: column; /* Елементи будуть розміщені зверху вниз */
             min-height: 100vh; /* Займаємо всю висоту екрану */
+            overflow: hidden; /* Запобігаємо прокрутці body, коли панелі з'являються */
         }
         #map {
             flex-grow: 1; /* Мапа займатиме весь доступний простір по вертикалі */
             width: 100%;
             min-height: 50vh; /* Мінімальна висота для мапи, щоб не була надто маленькою на мобільних */
+            position: relative; /* Для правильного z-index */
+            z-index: 1; /* Мапа під усіма елементами керування */
         }
         /* Базові стилі для панелей - на десктопі вони залишаються абсолютними */
         #form, #legend, #admin-panel {
@@ -81,61 +84,27 @@
                 flex-direction: column; /* Елементи вибудовуються вертикально */
             }
             #map {
-                height: 60vh; /* Займає менше висоти, щоб залишити місце для панелей */
-                min-height: 300px; /* Додаємо мінімальну висоту, щоб мапа не була надто маленькою */
+                height: 100vh; /* Мапа займає 100% висоти на мобільних, щоб панелі могли виїхати поверх */
+                min-height: 300px;
             }
 
-            /* Панелі розміщуємо внизу, по центру, використовуючи відносне позиціонування в потоці */
-            #form, #legend, #admin-panel {
-                position: fixed; /* Фіксоване позиціонування для плаваючих панелей */
-                bottom: 0; /* Прикріпити до низу */
-                left: 0;
-                width: 100%; /* Займати всю ширину */
-                max-width: none; /* Знімаємо обмеження max-width */
-                border-radius: 12px 12px 0 0; /* Округлі кути зверху */
-                padding: 15px;
-                box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.1); /* Тінь зверху */
-                transform: translateY(100%); /* Приховати за екраном */
-                transition: transform 0.3s ease-out; /* Анімація виїзду */
-            }
-
-            #form.visible, #legend.visible, #admin-panel.visible {
-                transform: translateY(0); /* Показати панель */
-            }
-
-            /* Інструкції */
-            #instructions {
-                position: fixed; /* Фіксована позиція */
-                top: 10px; /* Трохи від верху */
-                left: 50%;
-                transform: translateX(-50%);
-                font-size: 12px;
-                padding: 8px 12px;
-                white-space: nowrap; /* Не переносити текст інструкцій */
-                overflow: hidden; /* Приховати, якщо забагато тексту */
-                text-overflow: ellipsis; /* Додати три крапки */
-            }
-
-            /* Приховуємо інші панелі, коли одна активна */
-            #form:not(.visible), #legend:not(.visible), #admin-panel:not(.visible) {
-                display: none; /* Повністю приховуємо, коли не visible */
-            }
-
-            /* Кнопки для навігації між панелями на мобільних пристроях */
+            /* Важливо: задаємо фіксовану висоту для кнопок навігації */
             .mobile-nav-buttons {
-                display: flex; /* Показуємо кнопки */
-                justify-content: space-around; /* Розподіляємо їх рівномірно */
+                display: flex;
+                justify-content: space-around;
                 padding: 10px;
                 background: #fff;
                 box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-                z-index: 1001; /* Над панелями */
-                position: sticky; /* Щоб прилипали до низу */
+                z-index: 1001; /* Над усіма панелями та мапою */
+                position: fixed; /* Фіксуємо до низу */
                 bottom: 0;
+                left: 0;
                 width: 100%;
+                height: 60px; /* Фіксована висота, наприклад 60px */
             }
 
             .mobile-nav-buttons button {
-                flex: 1; /* Щоб кнопки займали рівну ширину */
+                flex: 1;
                 margin: 0 5px;
                 padding: 10px 0;
                 font-size: 14px;
@@ -147,6 +116,46 @@
             .mobile-nav-buttons button.active {
                 background: #007aff;
                 color: white;
+            }
+
+            /* Панелі розміщуємо внизу, по центру, використовуючи фіксоване позиціонування */
+            #form, #legend, #admin-panel {
+                position: fixed;
+                bottom: var(--mobile-nav-height, 60px); /* Піднімаємо на висоту навігаційної панелі */
+                left: 0;
+                width: 100%;
+                max-width: none;
+                border-radius: 12px 12px 0 0;
+                padding: 15px;
+                box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.1);
+                transform: translateY(100%); /* Приховати за екраном */
+                transition: transform 0.3s ease-out;
+                z-index: 1000; /* Під кнопками навігації */
+                max-height: calc(100vh - var(--mobile-nav-height, 60px) - 20px); /* Обмежуємо висоту, щоб не вилазили за екран, -20px для відступу зверху */
+                overflow-y: auto; /* Додаємо прокрутку, якщо вміст більший */
+            }
+
+            #form.visible, #legend.visible, #admin-panel.visible {
+                transform: translateY(0); /* Показати панель */
+            }
+
+            /* Інструкції */
+            #instructions {
+                position: fixed;
+                top: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 12px;
+                padding: 8px 12px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                z-index: 1002; /* Над усім, включаючи кнопки навігації */
+            }
+
+            /* Приховуємо інші панелі, коли одна активна */
+            #form:not(.visible), #legend:not(.visible), #admin-panel:not(.visible) {
+                display: none;
             }
         }
 
@@ -280,8 +289,8 @@
         }).addTo(map);
 
         const form = document.getElementById('form');
-        const legend = document.getElementById('legend'); // Додано
-        const adminPanel = document.getElementById('admin-panel'); // Додано
+        const legend = document.getElementById('legend');
+        const adminPanel = document.getElementById('admin-panel');
 
         const categorySelect = document.getElementById('category');
         const nameInput = document.getElementById('name');
@@ -295,12 +304,13 @@
         const exportGeoJSONBtn = document.getElementById('export-geojson');
         const deleteAllBtn = document.getElementById('delete-all');
 
-        // Мобільні кнопки навігації
         const showFormBtn = document.getElementById('show-form-btn');
         const showLegendBtn = document.getElementById('show-legend-btn');
         const showAdminBtn = document.getElementById('show-admin-btn');
         const mobileNavButtons = document.querySelector('.mobile-nav-buttons');
 
+        // Визначаємо висоту мобільної навігаційної смуги як CSS змінну
+        document.documentElement.style.setProperty('--mobile-nav-height', '60px'); // Відповідає height у CSS
 
         let tempMarker = null;
         let markers = [];
@@ -314,7 +324,6 @@
             proud: '#B8860B'
         };
 
-        // Функція для екранування HTML-спеціальних символів (ЗАХИСТ ВІД XSS)
         function escapeHtml(unsafe) {
             return unsafe
                 .replace(/&/g, "&amp;")
@@ -334,10 +343,8 @@
             });
         }
 
-        // Функція для додавання маркера в Firestore
         async function addMarkerToFirestore(lat, lng, category, name, description) {
             const userId = auth.currentUser ? auth.currentUser.uid : null;
-
             try {
                 const docRef = await db.collection("markers").add({
                     lat: lat,
@@ -357,11 +364,9 @@
             }
         }
 
-        // Функція для завантаження маркерів з Firestore
         async function loadMarkersFromFirestore() {
             markers.forEach(marker => map.removeLayer(marker));
             markers = [];
-
             try {
                 const querySnapshot = await db.collection("markers").get();
                 querySnapshot.forEach(doc => {
@@ -373,7 +378,6 @@
             }
         }
 
-        // Функція для видалення маркера з Firestore
         async function deleteMarkerFromFirestore(id) {
             try {
                 await db.collection("markers").doc(id).delete();
@@ -417,8 +421,7 @@
                 instructions.textContent = 'Клікніть на мапу, щоб обрати локацію для нової точки.';
             } else {
                 instructions.classList.add('hidden');
-                // Приховати форму, якщо не в режимі додавання (наприклад, в адмін-режимі)
-                if (window.innerWidth > 768) { // Тільки на десктопі, на мобільних приховуємо через showPanel
+                if (window.innerWidth > 768) {
                     form.classList.add('hidden');
                 }
                 if (tempMarker) {
@@ -455,12 +458,12 @@
                 // Помилка вже була оброблена в addMarkerToFirestore
             }
 
-            cancelMarker(); // Скидаємо форму та приховуємо
+            cancelMarker();
         }
 
         function cancelMarker() {
-            form.classList.add('hidden');
-            form.classList.remove('visible'); // Для мобільних
+            form.classList.remove('visible'); // Видаляємо клас 'visible'
+            form.classList.add('hidden'); // Додаємо 'hidden' назад для десктопу
 
             nameInput.value = '';
             descriptionInput.value = '';
@@ -470,9 +473,10 @@
                 tempMarker = null;
             }
             instructions.textContent = 'Клікніть на мапу, щоб обрати локацію для нової точки.';
-            if (window.innerWidth <= 768) { // Приховати кнопки навігації якщо жодна панель не активна
-                mobileNavButtons.classList.remove('hidden');
-                showFormBtn.classList.remove('active');
+            if (window.innerWidth <= 768) {
+                // При скасуванні, якщо ми на мобільному, просто приховати панель, але залишити кнопки навігації
+                hideAllPanels(); // Приховуємо всі панелі
+                // Не скидаємо активний стан з кнопок мобільної навігації автоматично тут
             }
         }
 
@@ -540,7 +544,6 @@
             }
         }
 
-        // --- Admin Functions ---
         async function enterAdminMode() {
             const email = adminEmailInput.value.trim();
             const password = adminPasswordInput.value.trim();
@@ -560,7 +563,6 @@
                     isAdminMode = true;
                     toggleAddMarkerMode(false);
 
-                    // Оновлення UI адмін-панелі
                     adminEmailInput.classList.add('hidden');
                     adminPasswordInput.classList.add('hidden');
                     enterAdminBtn.classList.add('hidden');
@@ -570,13 +572,13 @@
                     deleteAllBtn.classList.remove('hidden');
 
                     instructions.classList.add('hidden');
-
                     updateAllMarkerPopups();
-                    alert('Успішний вхід в адмін-режим!');
 
                     if (window.innerWidth <= 768) {
-                        showPanel(adminPanel, showAdminBtn);
-                        mobileNavButtons.classList.remove('hidden'); // Показуємо навігацію
+                        showPanel(adminPanel, showAdminBtn); // Показуємо адмін-панель
+                    } else {
+                        // На десктопі, якщо адмін увійшов, приховуємо форму
+                        form.classList.add('hidden');
                     }
 
                 } else {
@@ -616,14 +618,18 @@
                 exportGeoJSONBtn.classList.add('hidden');
                 deleteAllBtn.classList.add('hidden');
 
-                toggleAddMarkerMode(true);
+                toggleAddMarkerMode(true); // Після виходу з адміна, дозволяємо додавати звичайним користувачам
 
                 updateAllMarkerPopups();
                 alert('Ви вийшли з адмін-режиму.');
 
                 if (window.innerWidth <= 768) {
                     hideAllPanels(); // Приховуємо всі панелі
-                    mobileNavButtons.classList.remove('hidden'); // Показуємо навігацію
+                    // При виході з адмін-режиму на мобільних, логічно показати форму додавання точок або мапу.
+                    // Можемо залишити просто мапу з інструкціями.
+                } else {
+                    // На десктопі, після виходу з адміна, знову показуємо форму
+                    form.classList.remove('hidden');
                 }
 
             } catch (error) {
@@ -704,16 +710,20 @@
             legend.classList.remove('visible');
             adminPanel.classList.remove('visible');
             document.querySelectorAll('.mobile-nav-buttons button').forEach(btn => btn.classList.remove('active'));
+            // Після приховання всіх панелей, показуємо інструкції (якщо не в адмін-режимі)
+            if (!isAdminMode) {
+                instructions.classList.remove('hidden');
+            }
         }
 
         function showPanel(panelElement, buttonElement = null) {
-            hideAllPanels();
-            panelElement.classList.add('visible');
+            hideAllPanels(); // Спочатку ховаємо всі панелі та деактивуємо кнопки
+            panelElement.classList.remove('hidden'); // Забезпечуємо, що елемент не має display: none
+            panelElement.classList.add('visible'); // Викликаємо анімацію
             if (buttonElement) {
                 buttonElement.classList.add('active');
             }
-            // Приховуємо інструкції, якщо показуємо панель
-            instructions.classList.add('hidden');
+            instructions.classList.add('hidden'); // Приховуємо інструкції, коли панель активна
         }
 
         // Додаємо обробники подій для мобільних кнопок
@@ -724,7 +734,7 @@
         showLegendBtn.addEventListener('click', () => {
             showPanel(legend, showLegendBtn);
             toggleAddMarkerMode(false); // Вимикаємо додавання точок
-            if (tempMarker) { // Приховуємо тимчасовий маркер, якщо він є
+            if (tempMarker) {
                 map.removeLayer(tempMarker);
                 tempMarker = null;
             }
@@ -738,8 +748,6 @@
             }
         });
 
-
-        // Initial load of markers when the page loads
         loadMarkersFromFirestore();
 
         auth.onAuthStateChanged(user => {
@@ -761,10 +769,8 @@
                     instructions.classList.add('hidden');
                     updateAllMarkerPopups();
 
-                    // Якщо це мобільна версія, автоматично показуємо адмін-панель після входу
                     if (window.innerWidth <= 768) {
                         showPanel(adminPanel, showAdminBtn);
-                        mobileNavButtons.classList.remove('hidden'); // Показуємо навігацію
                     }
                 } else {
                     isAdminMode = false;
@@ -787,11 +793,9 @@
                 updateAllMarkerPopups();
 
                 if (window.innerWidth <= 768) {
-                    hideAllPanels(); // Приховуємо всі панелі
-                    // При виході з адмін-режиму на мобільних, логічно показати форму додавання точок (якщо не адмін)
-                    // або просто залишити мапу відкритою.
-                    // Тут можна вирішити, що показувати за замовчуванням
-                    mobileNavButtons.classList.remove('hidden'); // Показуємо навігацію
+                    hideAllPanels(); // При виході з системи приховуємо всі панелі
+                    // І автоматично показуємо інструкції, оскільки користувач не в адмін-режимі
+                    instructions.classList.remove('hidden');
                 }
             }
         });
@@ -800,34 +804,31 @@
         window.addEventListener('load', () => {
             if (window.innerWidth <= 768) {
                 hideAllPanels(); // На мобільних спочатку всі панелі приховані
-                mobileNavButtons.classList.remove('hidden'); // Показуємо кнопки навігації
+                // Кнопки навігації завжди видимі на мобільних, немає потреби їх приховувати/показувати тут.
             } else {
-                // На десктопі показуємо всі, як було
                 form.classList.remove('hidden');
                 legend.classList.remove('hidden');
                 adminPanel.classList.remove('hidden');
-                mobileNavButtons.classList.add('hidden'); // Приховуємо кнопки мобільної навігації
+                mobileNavButtons.classList.add('hidden'); // Приховуємо кнопки мобільної навігації на десктопі
             }
-             // Перевіряємо isAdminMode після завантаження, щоб коректно відобразити інструкції
-            if (!isAdminMode) {
+             if (!isAdminMode) {
                 toggleAddMarkerMode(true);
             }
         });
 
-        // Перемикаємо відображення панелей при зміні розміру вікна (наприклад, при повороті телефону)
+        // Перемикаємо відображення панелей при зміні розміру вікна
         window.addEventListener('resize', () => {
             if (window.innerWidth <= 768) {
                 hideAllPanels(); // Приховати всі панелі при зміні розміру на мобільний
                 mobileNavButtons.classList.remove('hidden');
             } else {
-                // На десктопі показуємо всі
                 form.classList.remove('hidden');
                 legend.classList.remove('hidden');
                 adminPanel.classList.remove('hidden');
                 mobileNavButtons.classList.add('hidden');
             }
             if (!isAdminMode) {
-                toggleAddMarkerMode(true); // Завжди вмикаємо режим додавання для звичайних користувачів
+                toggleAddMarkerMode(true);
             }
         });
     </script>

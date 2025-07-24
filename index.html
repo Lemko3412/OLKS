@@ -362,9 +362,9 @@
                 }
                 tempMarker = L.marker(e.latlng, { opacity: 0.7, draggable: true }).addTo(map);
                 tempMarker.on('dragend', function(event) {
-                    instructions.textContent = `Оберіть категорію.`;
+                    instructions.textContent = `Оберіть категорію та введіть назву локації.`;
                 });
-                instructions.textContent = `Оберіть категорію.`;
+                instructions.textContent = `Оберіть категорію та введіть назву локації.`;
                 form.classList.remove('hidden');
             }
         });

@@ -362,7 +362,7 @@
                 }
                 tempMarker = L.marker(e.latlng, { opacity: 0.7, draggable: true }).addTo(map);
                 tempMarker.on('dragend', function(event) {
-                    instructions.textContent = `Обрана локація: ${event.target.getLatLng().lat.toFixed(4)}, ${event.target.getLatLng().lng.toFixed(4)}. Оберіть категорію.`;
+                    instructions.textContent = `Оберіть категорію.`;
                 });
                 instructions.textContent = `Обрана локація: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}. Оберіть категорію.`;
                 form.classList.remove('hidden');

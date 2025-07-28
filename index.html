@@ -653,7 +653,8 @@
         let cityBoundaryLayer;
         let hromadaBoundaryLayer;
 
-        async function loadGeoJSONLayer(filePath, layerName, color, weight = 3, opacity = 0.7, fillOpacity = 0.1) {
+        // ОНОВЛЕНО: Тепер fillOpacity за замовчуванням 0, щоб прибрати заливку
+        async function loadGeoJSONLayer(filePath, layerName, color, weight = 3, opacity = 1, fillOpacity = 0) {
             try {
                 const response = await fetch(filePath);
                 if (!response.ok) {
@@ -667,7 +668,7 @@
                             color: color,
                             weight: weight,
                             opacity: opacity,
-                            fillOpacity: fillOpacity
+                            fillOpacity: fillOpacity // ВСТАНОВЛЕНО НА 0 ДЛЯ ВИМКНЕННЯ ЗАЛИВКИ
                         };
                     },
                     onEachFeature: function(feature, layer) {
@@ -706,12 +707,13 @@
         loadMarkersFromFirestore();
 
         // Завантажуємо шари меж після ініціалізації мапи та інших основних компонентів
-        // Межі міста: світліший синій, тонша лінія
-        loadGeoJSONLayer('data/olexandria_city.geojson', 'Межі міста Олександрія', '#6495ED', 2, 0.8, 0.05)
+        // ОНОВЛЕНО: Чорні межі, різні товщини, без заливки
+        // Межі міста: чорний, товщина 2px, без заливки
+        loadGeoJSONLayer('data/olexandria_city.geojson', 'Межі міста Олександрія', '#000000', 2, 1, 0)
             .then(layer => cityBoundaryLayer = layer);
 
-        // Межі громади: трохи темніший помаранчевий, товстіша лінія, більша прозорість заливки
-        loadGeoJSONLayer('data/olexandria_hromada.geojson', 'Межі Олександрійської громади', '#FF8C00', 4, 0.7, 0.03)
+        // Межі громади: чорний, товщина 4px, без заливки (товстіша для ієрархії)
+        loadGeoJSONLayer('data/olexandria_hromada.geojson', 'Межі Олександрійської громади', '#000000', 4, 1, 0)
             .then(layer => hromadaBoundaryLayer = layer);
 
 

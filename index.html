@@ -708,12 +708,12 @@
 
         // Завантажуємо шари меж після ініціалізації мапи та інших основних компонентів
         // ОНОВЛЕНО: Чорні межі, різні товщини, без заливки
-        // Межі міста: чорний, товщина 2px, без заливки
-        loadGeoJSONLayer('data/olexandria_city.geojson', 'Межі міста Олександрія', '#000000', 2, 1, 0)
+        // Межі міста: чорний, товщина 1px, без заливки
+        loadGeoJSONLayer('data/olexandria_city.geojson', 'Межі міста Олександрія', '#000000', 1, 1, 0)
             .then(layer => cityBoundaryLayer = layer);
 
-        // Межі громади: чорний, товщина 4px, без заливки (товстіша для ієрархії)
-        loadGeoJSONLayer('data/olexandria_hromada.geojson', 'Межі Олександрійської громади', '#000000', 4, 1, 0)
+        // Межі громади: чорний, товщина 2px, без заливки (товстіша для ієрархії)
+        loadGeoJSONLayer('data/olexandria_hromada.geojson', 'Межі Олександрійської громади', '#000000', 2, 1, 0)
             .then(layer => hromadaBoundaryLayer = layer);
 
 
